@@ -10,7 +10,9 @@ type Bus = { listeners: Set<() => void> };
 const bus: Bus = { listeners: new Set() };
 export function subscribeLibrary(cb: () => void) {
   bus.listeners.add(cb);
-  return () => bus.listeners.delete(cb);
+  return () => {
+    bus.listeners.delete(cb);
+  };
 }
 function emit() {
   bus.listeners.forEach((l) => l());
