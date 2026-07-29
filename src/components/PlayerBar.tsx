@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { usePlayer } from "@/lib/player";
+import { EQ_BANDS, EQ_PRESETS } from "@/lib/player";
 import { decode, fmtTime, getLyrics, pickImg, type Lyrics } from "@/lib/saavn";
 
 export function PlayerBar() {
@@ -12,6 +13,7 @@ export function PlayerBar() {
     <>
       {p.showQueue && <QueueDrawer />}
       {p.showLyrics && <LyricsDrawer />}
+      {p.showEq && <EqDrawer />}
       <div className="fixed inset-x-0 bottom-0 z-30 border-t border-white/10 bg-[#0b0714]/90 pb-[env(safe-area-inset-bottom)] backdrop-blur-2xl">
         {/* Progress on very top for mobile */}
         <input
