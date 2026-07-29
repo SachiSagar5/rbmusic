@@ -121,6 +121,11 @@ export function PlayerBar() {
                 <path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" strokeLinecap="round" />
               </svg>
             </ToggleIcon>
+            <ToggleIcon on={p.eqEnabled || p.showEq} title="Equalizer & Boost" onClick={() => p.setShowEq(!p.showEq)}>
+              <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M6 20V10M6 6V4M12 20v-6M12 10V4M18 20v-2M18 14V4M3 10h6M9 14h6M15 18h6" strokeLinecap="round" />
+              </svg>
+            </ToggleIcon>
             <div className="flex w-28 items-center gap-2">
               <svg viewBox="0 0 24 24" className="h-4 w-4 text-white/50"><path d="M3 10v4h4l5 5V5L7 10H3z" fill="currentColor"/></svg>
               <input type="range" min={0} max={1} step={0.01} value={p.volume} aria-label="Volume"
@@ -138,6 +143,11 @@ export function PlayerBar() {
             <ToggleIcon on={p.showQueue} title="Queue" onClick={() => p.setShowQueue(!p.showQueue)}>
               <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" strokeLinecap="round" />
+              </svg>
+            </ToggleIcon>
+            <ToggleIcon on={p.eqEnabled || p.showEq} title="Equalizer & Boost" onClick={() => p.setShowEq(!p.showEq)}>
+              <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M6 20V10M6 6V4M12 20v-6M12 10V4M18 20v-2M18 14V4M3 10h6M9 14h6M15 18h6" strokeLinecap="round" />
               </svg>
             </ToggleIcon>
           </div>
