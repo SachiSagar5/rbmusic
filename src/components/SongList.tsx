@@ -77,7 +77,7 @@ export function SongList({
   }, [songs, libV]);
 
   return (
-    <ul className="divide-y divide-white/5 rounded-2xl border border-white/10 bg-white/5">
+    <ul className="divide-y divide-white/5 overflow-hidden rounded-3xl glass">
       {songs.map((s, i) => {
         const isCurrent = player.current?.id === s.id;
         const liked = isLiked(s.id);
@@ -236,7 +236,7 @@ function AddToPlaylistMenu({ song }: { song: SSong }) {
       {open && (
         <>
           <div className="fixed inset-0 z-40" onClick={() => { setOpen(false); setCreating(false); }} />
-          <div className="absolute right-0 z-50 mt-1 w-56 overflow-hidden rounded-xl border border-white/10 bg-[#150e26] p-1 shadow-2xl">
+          <div className="absolute right-0 z-50 mt-1 w-56 overflow-hidden rounded-2xl p-1 glass-panel">
             {pls.length > 0 &&
               pls.map((p) => (
                 <button

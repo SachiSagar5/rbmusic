@@ -125,9 +125,12 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <PlayerProvider>
-        <div className="relative min-h-screen bg-[#0b0714] text-white">
-          <div className="pointer-events-none fixed -top-40 -left-32 h-[520px] w-[520px] rounded-full bg-fuchsia-600/20 blur-3xl" />
-          <div className="pointer-events-none fixed top-40 right-0 h-[420px] w-[420px] rounded-full bg-indigo-500/15 blur-3xl" />
+        <div className="relative min-h-screen overflow-hidden bg-[#07040f] text-white">
+          {/* Liquid glass ambient background */}
+          <div className="pointer-events-none fixed -top-40 -left-32 h-[620px] w-[620px] rounded-full bg-fuchsia-500/40 blur-[120px]" />
+          <div className="pointer-events-none fixed top-40 right-0 h-[520px] w-[520px] rounded-full bg-indigo-500/35 blur-[110px]" />
+          <div className="pointer-events-none fixed bottom-0 left-1/3 h-[480px] w-[480px] rounded-full bg-cyan-400/20 blur-[120px]" />
+          <div className="pointer-events-none fixed -bottom-20 right-1/4 h-[420px] w-[420px] rounded-full bg-pink-500/25 blur-[100px]" />
           <div className="relative z-10">
             <AppHeader />
             <main className="mx-auto max-w-7xl px-4 pb-48 pt-6 sm:px-6 sm:pb-40">

@@ -142,3 +142,50 @@
     color: var(--color-foreground);
   }
 }
+
+/* ---------- iOS Liquid Glass ---------- */
+@utility glass {
+  background: linear-gradient(
+    135deg,
+    color-mix(in oklab, white 14%, transparent) 0%,
+    color-mix(in oklab, white 4%, transparent) 45%,
+    color-mix(in oklab, white 8%, transparent) 100%
+  );
+  backdrop-filter: blur(28px) saturate(180%);
+  border: 1px solid color-mix(in oklab, white 18%, transparent);
+  box-shadow:
+    inset 0 1px 0 0 color-mix(in oklab, white 35%, transparent),
+    inset 0 -1px 0 0 color-mix(in oklab, black 25%, transparent),
+    0 10px 40px -10px color-mix(in oklab, black 55%, transparent);
+}
+
+@utility glass-strong {
+  background: linear-gradient(
+    135deg,
+    color-mix(in oklab, white 22%, transparent) 0%,
+    color-mix(in oklab, white 8%, transparent) 50%,
+    color-mix(in oklab, white 14%, transparent) 100%
+  );
+  backdrop-filter: blur(40px) saturate(200%);
+  border: 1px solid color-mix(in oklab, white 25%, transparent);
+  box-shadow:
+    inset 0 1px 0 0 color-mix(in oklab, white 45%, transparent),
+    inset 0 -1px 0 0 color-mix(in oklab, black 30%, transparent),
+    0 20px 60px -15px color-mix(in oklab, black 65%, transparent);
+}
+
+@utility glass-panel {
+  background: color-mix(in oklab, #1a0f2e 55%, transparent);
+  backdrop-filter: blur(48px) saturate(180%);
+  border: 1px solid color-mix(in oklab, white 15%, transparent);
+  box-shadow:
+    inset 0 1px 0 0 color-mix(in oklab, white 30%, transparent),
+    0 -8px 32px -8px color-mix(in oklab, black 40%, transparent);
+}
+
+@utility glass-chip {
+  background: color-mix(in oklab, white 10%, transparent);
+  backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid color-mix(in oklab, white 18%, transparent);
+  box-shadow: inset 0 1px 0 0 color-mix(in oklab, white 30%, transparent);
+}

@@ -14,7 +14,8 @@ export function PlayerBar() {
       {p.showQueue && <QueueDrawer />}
       {p.showLyrics && <LyricsDrawer />}
       {p.showEq && <EqDrawer />}
-      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-white/10 bg-[#0b0714]/90 pb-[env(safe-area-inset-bottom)] backdrop-blur-2xl">
+      <div className="fixed inset-x-0 bottom-0 z-30 pb-[env(safe-area-inset-bottom)]">
+        <div className="mx-3 mb-3 rounded-3xl glass-panel sm:mx-6">
         {/* Progress on very top for mobile */}
         <input
           type="range"
@@ -29,7 +30,7 @@ export function PlayerBar() {
         <div className="mx-auto grid max-w-7xl grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-3 py-2 sm:flex sm:gap-4 sm:px-6 sm:py-3">
           {/* Track info */}
           <div className="flex min-w-0 items-center gap-3 sm:flex-1">
-            <div className="h-12 w-12 shrink-0 overflow-hidden rounded-lg bg-white/10 sm:h-14 sm:w-14">
+            <div className="h-12 w-12 shrink-0 overflow-hidden rounded-2xl bg-white/10 ring-1 ring-white/20 sm:h-14 sm:w-14">
               {img && <img src={img} alt="" className="h-full w-full object-cover" />}
             </div>
             <div className="min-w-0">
@@ -68,7 +69,7 @@ export function PlayerBar() {
                 <svg viewBox="0 0 24 24" className="h-5 w-5"><path d="M6 6h2v12H6zM20 6v12l-10-6z" fill="currentColor"/></svg>
               </button>
               <button onClick={p.toggle} disabled={!c} aria-label={p.playing ? "Pause" : "Play"}
-                className="grid h-11 w-11 place-items-center rounded-full bg-white text-black transition active:scale-95 hover:scale-105 disabled:opacity-30">
+                className="grid h-11 w-11 place-items-center rounded-full bg-gradient-to-br from-white to-white/80 text-black shadow-lg shadow-white/20 ring-1 ring-white/60 transition active:scale-95 hover:scale-105 disabled:opacity-30">
                 {p.playing ? (
                   <svg viewBox="0 0 24 24" className="h-5 w-5"><rect x="6" y="5" width="4" height="14" fill="currentColor"/><rect x="14" y="5" width="4" height="14" fill="currentColor"/></svg>
                 ) : (
@@ -152,6 +153,7 @@ export function PlayerBar() {
             </ToggleIcon>
           </div>
         </div>
+        </div>
       </div>
     </>
   );
@@ -174,7 +176,7 @@ function ToggleIcon({
       title={title}
       aria-label={title}
       className={`grid h-8 w-8 place-items-center rounded-full transition ${
-        on ? "bg-fuchsia-500/20 text-fuchsia-300" : "text-white/60 hover:bg-white/10 hover:text-white"
+        on ? "glass-chip text-fuchsia-200" : "text-white/60 hover:bg-white/10 hover:text-white"
       }`}
     >
       {children}
@@ -257,8 +259,8 @@ function LyricsDrawer() {
 function Drawer({ title, children, onClose }: { title: string; children: React.ReactNode; onClose: () => void }) {
   return (
     <>
-      <div className="fixed inset-0 z-30 bg-black/40" onClick={onClose} />
-      <aside className="fixed inset-x-0 bottom-[92px] z-40 mx-auto max-h-[70vh] max-w-2xl overflow-hidden rounded-t-2xl border border-white/10 bg-[#150e26] shadow-2xl sm:bottom-[104px]">
+      <div className="fixed inset-0 z-30 bg-black/50 backdrop-blur-sm" onClick={onClose} />
+      <aside className="fixed inset-x-3 bottom-[110px] z-40 mx-auto max-h-[70vh] max-w-2xl overflow-hidden rounded-3xl glass-panel sm:bottom-[124px] sm:inset-x-6">
         <div className="flex items-center justify-between border-b border-white/10 px-4 py-3">
           <h3 className="text-sm font-semibold text-white">{title}</h3>
           <button onClick={onClose} className="text-white/60 hover:text-white" aria-label="Close">
