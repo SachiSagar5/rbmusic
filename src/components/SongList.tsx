@@ -4,6 +4,7 @@ import { usePlayer } from "@/lib/player";
 import { decode, fmtTime, pickImg, type SSong } from "@/lib/saavn";
 import {
   addSongToPlaylist,
+  createPlaylist,
   getPlaylists,
   isLiked,
   setDownloaded,
@@ -28,6 +29,23 @@ async function downloadSong(song: SSong) {
   const blob = await res.blob();
   await putBlob(song.id, blob);
   setDownloaded(song, true);
+  // Also save the file to the user's device.
+  saveBlobToDevice(blob, `${decode(song.name).replace(/[\\/:*?"<>|]+/g, " ").trim() || song.id}.mp3`);
+}
+
+function saveBlobToDevice(blob: Blob, filename: string) {
+  try {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  } catch {
+    /* ignore */
+  }
 }
 
 async function removeDownload(song: SSong) {
@@ -203,23 +221,23 @@ function IconBtn({
 
 function AddToPlaylistMenu({ song }: { song: SSong }) {
   const [open, setOpen] = useState(false);
+  const [creating, setCreating] = useState(false);
+  const [name, setName] = useState("");
   const libV = useLibVersion();
   const pls = getPlaylists();
   void libV;
   return (
     <div className="relative">
-      <IconBtn title="Add to playlist" onClick={() => setOpen((v) => !v)}>
+      <IconBtn title="Add to playlist" onClick={() => { setOpen((v) => !v); setCreating(false); }}>
         <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
           <path d="M12 5v14m-7-7h14" strokeLinecap="round" />
         </svg>
       </IconBtn>
       {open && (
         <>
-          <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
+          <div className="fixed inset-0 z-40" onClick={() => { setOpen(false); setCreating(false); }} />
           <div className="absolute right-0 z-50 mt-1 w-56 overflow-hidden rounded-xl border border-white/10 bg-[#150e26] p-1 shadow-2xl">
-            {pls.length === 0 ? (
-              <p className="px-3 py-2 text-xs text-white/50">No playlists yet. Create one in Library.</p>
-            ) : (
+            {pls.length > 0 &&
               pls.map((p) => (
                 <button
                   key={p.id}
@@ -231,7 +249,46 @@ function AddToPlaylistMenu({ song }: { song: SSong }) {
                 >
                   {p.name}
                 </button>
-              ))
+              ))}
+            {pls.length > 0 && <div className="my-1 h-px bg-white/10" />}
+            {creating ? (
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  const v = name.trim();
+                  if (!v) return;
+                  const p = createPlaylist(v);
+                  addSongToPlaylist(p.id, song);
+                  setName("");
+                  setCreating(false);
+                  setOpen(false);
+                }}
+                className="flex items-center gap-1 p-1"
+              >
+                <input
+                  autoFocus
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Playlist name"
+                  className="min-w-0 flex-1 rounded-md bg-white/10 px-2 py-1 text-sm text-white outline-none placeholder:text-white/40"
+                />
+                <button
+                  type="submit"
+                  className="rounded-md bg-gradient-to-r from-fuchsia-500 to-indigo-500 px-2 py-1 text-xs font-semibold text-white"
+                >
+                  Add
+                </button>
+              </form>
+            ) : (
+              <button
+                onClick={() => setCreating(true)}
+                className="flex w-full items-center gap-2 rounded-lg px-3 py-1.5 text-left text-sm text-fuchsia-300 hover:bg-white/10"
+              >
+                <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M12 5v14m-7-7h14" strokeLinecap="round" />
+                </svg>
+                New playlist
+              </button>
             )}
           </div>
         </>
