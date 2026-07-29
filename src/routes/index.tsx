@@ -4,10 +4,10 @@ import { useEffect, useMemo, useRef, useState } from "react";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Nova — Stream Music You Love" },
-      { name: "description", content: "Search and stream millions of songs instantly with Nova, a fast, beautiful music player." },
-      { property: "og:title", content: "Nova — Stream Music You Love" },
-      { property: "og:description", content: "Search and stream millions of songs instantly with Nova." },
+      { title: "RB Music — Stream Music You Love" },
+      { name: "description", content: "Search and stream millions of songs instantly with RB Music, a fast, beautiful music player." },
+      { property: "og:title", content: "RB Music — Stream Music You Love" },
+      { property: "og:description", content: "Search and stream millions of songs instantly with RB Music." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -121,37 +121,35 @@ function Index() {
       <div className="pointer-events-none absolute top-40 right-0 h-[420px] w-[420px] rounded-full bg-indigo-500/25 blur-3xl" />
       <div className="pointer-events-none absolute bottom-40 left-1/2 h-[380px] w-[380px] -translate-x-1/2 rounded-full bg-cyan-500/15 blur-3xl" />
 
-      <div className="relative z-10 mx-auto max-w-7xl px-6 pb-40 pt-10">
+      <div className="relative z-10 mx-auto max-w-7xl px-4 pb-56 pt-6 sm:px-6 sm:pb-40 sm:pt-10">
         {/* Header */}
-        <header className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="grid h-10 w-10 place-items-center rounded-xl bg-gradient-to-br from-fuchsia-500 to-indigo-500 shadow-lg shadow-fuchsia-500/30">
+        <header className="flex items-center justify-between gap-3">
+          <div className="flex min-w-0 items-center gap-3">
+            <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-fuchsia-500 to-indigo-500 shadow-lg shadow-fuchsia-500/30">
               <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5 text-white">
                 <path d="M9 18V6l10-2v12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                 <circle cx="6" cy="18" r="3" stroke="currentColor" strokeWidth="2"/>
                 <circle cx="16" cy="16" r="3" stroke="currentColor" strokeWidth="2"/>
               </svg>
             </div>
-            <div>
-              <h1 className="text-xl font-bold tracking-tight">Nova</h1>
-              <p className="text-xs text-white/50">Stream what you love</p>
+            <div className="min-w-0">
+              <h1 className="truncate text-xl font-bold tracking-tight">RB Music</h1>
+              <p className="truncate text-xs text-white/50">Stream what you love</p>
             </div>
           </div>
-          <a href="https://github.com/sumitkolhe/jiosaavn-api" target="_blank" rel="noreferrer"
-             className="hidden text-xs text-white/60 hover:text-white sm:block">powered by jiosaavn-api ↗</a>
         </header>
 
         {/* Hero */}
-        <section className="mt-14 max-w-3xl">
+        <section className="mt-10 max-w-3xl sm:mt-14">
           <p className="text-sm font-medium uppercase tracking-[0.2em] text-fuchsia-300/80">Now playing everywhere</p>
-          <h2 className="mt-3 text-5xl font-bold leading-[1.05] tracking-tight sm:text-6xl">
+          <h2 className="mt-3 text-4xl font-bold leading-[1.05] tracking-tight sm:text-6xl">
             Millions of songs.
             <span className="block bg-gradient-to-r from-fuchsia-400 via-pink-400 to-indigo-400 bg-clip-text text-transparent">
               One tap to play.
             </span>
           </h2>
-          <p className="mt-5 max-w-xl text-white/60">
-            Search any artist, album or track. Nova streams instantly — no signup, no ads.
+          <p className="mt-5 max-w-xl text-sm text-white/60 sm:text-base">
+            Search any artist, album or track. RB Music streams instantly — no signup, no ads.
           </p>
 
           {/* Search */}
@@ -197,12 +195,12 @@ function Index() {
         </section>
 
         {/* Results */}
-        <section className="mt-14">
+        <section className="mt-10 sm:mt-14">
           <div className="mb-5 flex items-baseline justify-between">
-            <h3 className="text-lg font-semibold">
+            <h3 className="truncate pr-3 text-base font-semibold sm:text-lg">
               {loading ? "Searching…" : `Results for “${query}”`}
             </h3>
-            <span className="text-xs text-white/40">{songs.length} tracks</span>
+            <span className="shrink-0 text-xs text-white/40">{songs.length} tracks</span>
           </div>
 
           {loading ? (
@@ -220,7 +218,7 @@ function Index() {
                   <button
                     key={s.id}
                     onClick={() => play(s)}
-                    className="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 p-3 text-left backdrop-blur-xl transition hover:-translate-y-1 hover:border-white/20 hover:bg-white/10"
+                    className="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 p-3 text-left backdrop-blur-xl transition active:scale-[0.98] hover:-translate-y-1 hover:border-white/20 hover:bg-white/10"
                   >
                     <div className="relative aspect-square overflow-hidden rounded-xl">
                       {img && (
@@ -228,7 +226,7 @@ function Index() {
                              className="h-full w-full object-cover transition group-hover:scale-105" />
                       )}
                       <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 transition group-hover:opacity-100" />
-                      <div className={`absolute bottom-3 right-3 grid h-11 w-11 place-items-center rounded-full bg-gradient-to-br from-fuchsia-500 to-indigo-500 text-white shadow-xl shadow-fuchsia-500/40 transition ${isCurrent && playing ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}>
+                      <div className={`absolute bottom-2 right-2 grid h-10 w-10 place-items-center rounded-full bg-gradient-to-br from-fuchsia-500 to-indigo-500 text-white shadow-xl shadow-fuchsia-500/40 transition sm:bottom-3 sm:right-3 sm:h-11 sm:w-11 ${isCurrent && playing ? "opacity-100" : "opacity-100 sm:opacity-0 sm:group-hover:opacity-100"}`}>
                         {isCurrent && playing ? (
                           <svg viewBox="0 0 24 24" className="h-5 w-5"><rect x="6" y="5" width="4" height="14" fill="currentColor"/><rect x="14" y="5" width="4" height="14" fill="currentColor"/></svg>
                         ) : (
@@ -251,10 +249,10 @@ function Index() {
       </div>
 
       {/* Player */}
-      <div className="fixed inset-x-0 bottom-0 z-20 border-t border-white/10 bg-[#0b0714]/85 backdrop-blur-2xl">
-        <div className="mx-auto flex max-w-7xl items-center gap-4 px-6 py-4">
-          <div className="flex min-w-0 flex-1 items-center gap-3">
-            <div className="h-14 w-14 shrink-0 overflow-hidden rounded-lg bg-white/10">
+      <div className="fixed inset-x-0 bottom-0 z-20 border-t border-white/10 bg-[#0b0714]/85 pb-[env(safe-area-inset-bottom)] backdrop-blur-2xl">
+        <div className="mx-auto grid max-w-7xl grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-4 py-3 sm:flex sm:gap-4 sm:px-6 sm:py-4">
+          <div className="flex min-w-0 items-center gap-3 sm:flex-1">
+            <div className="h-12 w-12 shrink-0 overflow-hidden rounded-lg bg-white/10 sm:h-14 sm:w-14">
               {currentImg && <img src={currentImg} alt="" className="h-full w-full object-cover" />}
             </div>
             <div className="min-w-0">
@@ -267,21 +265,21 @@ function Index() {
             </div>
           </div>
 
-          <div className="flex flex-[2] flex-col items-center gap-2">
-            <div className="flex items-center gap-4">
-              <button onClick={prev} disabled={currentIdx <= 0}
+          <div className="col-span-2 row-start-2 flex w-full flex-col items-center gap-2 sm:col-span-1 sm:row-start-auto sm:w-auto sm:flex-[2]">
+            <div className="flex items-center gap-5 sm:gap-4">
+              <button onClick={prev} disabled={currentIdx <= 0} aria-label="Previous"
                 className="text-white/70 transition hover:text-white disabled:opacity-30">
                 <svg viewBox="0 0 24 24" className="h-5 w-5"><path d="M6 6h2v12H6zM20 6v12l-10-6z" fill="currentColor"/></svg>
               </button>
-              <button onClick={toggle} disabled={!current}
-                className="grid h-11 w-11 place-items-center rounded-full bg-white text-black transition hover:scale-105 disabled:opacity-30">
+              <button onClick={toggle} disabled={!current} aria-label={playing ? "Pause" : "Play"}
+                className="grid h-12 w-12 place-items-center rounded-full bg-white text-black transition active:scale-95 hover:scale-105 disabled:opacity-30 sm:h-11 sm:w-11">
                 {playing ? (
                   <svg viewBox="0 0 24 24" className="h-5 w-5"><rect x="6" y="5" width="4" height="14" fill="currentColor"/><rect x="14" y="5" width="4" height="14" fill="currentColor"/></svg>
                 ) : (
                   <svg viewBox="0 0 24 24" className="h-5 w-5"><path d="M8 5v14l11-7z" fill="currentColor"/></svg>
                 )}
               </button>
-              <button onClick={next} disabled={currentIdx < 0 || currentIdx >= songs.length - 1}
+              <button onClick={next} disabled={currentIdx < 0 || currentIdx >= songs.length - 1} aria-label="Next"
                 className="text-white/70 transition hover:text-white disabled:opacity-30">
                 <svg viewBox="0 0 24 24" className="h-5 w-5"><path d="M16 6h2v12h-2zM4 6l10 6-10 6z" fill="currentColor"/></svg>
               </button>
@@ -290,8 +288,9 @@ function Index() {
               <span className="w-9 text-right tabular-nums">{fmt(progress)}</span>
               <input
                 type="range" min={0} max={duration || 0} value={progress} step={0.1}
+                aria-label="Seek"
                 onChange={(e) => { const v = +e.target.value; setProgress(v); seek(v); }}
-                className="h-1 flex-1 accent-fuchsia-400"
+                className="h-1 flex-1 touch-none accent-fuchsia-400"
               />
               <span className="w-9 tabular-nums">{fmt(duration || (current?.duration ?? 0))}</span>
             </div>
@@ -299,9 +298,9 @@ function Index() {
 
           <div className="hidden w-32 items-center gap-2 md:flex">
             <svg viewBox="0 0 24 24" className="h-4 w-4 text-white/50"><path d="M3 10v4h4l5 5V5L7 10H3z" fill="currentColor"/></svg>
-            <input type="range" min={0} max={1} step={0.01} value={volume}
+            <input type="range" min={0} max={1} step={0.01} value={volume} aria-label="Volume"
               onChange={(e) => setVolume(+e.target.value)}
-              className="h-1 flex-1 accent-fuchsia-400" />
+              className="h-1 flex-1 touch-none accent-fuchsia-400" />
           </div>
         </div>
 
