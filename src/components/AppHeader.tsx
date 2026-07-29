@@ -24,7 +24,7 @@ export function AppHeader() {
 
   return (
     <header className="sticky top-0 z-30">
-      <div className="mx-auto mt-3 flex max-w-7xl items-center gap-3 rounded-3xl px-4 py-3 sm:gap-4 sm:px-5 glass mx-3 sm:mx-6">
+      <div className="mx-3 mt-3 flex max-w-7xl items-center gap-3 rounded-3xl px-4 py-3 glass sm:mx-auto sm:gap-4 sm:px-5">
         <Link to="/" className="flex min-w-0 items-center gap-2">
           <div className="grid h-9 w-9 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-fuchsia-400 via-pink-500 to-indigo-500 shadow-lg shadow-fuchsia-500/40 ring-1 ring-white/40">
             <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4 text-white">

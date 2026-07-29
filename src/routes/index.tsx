@@ -143,7 +143,9 @@ function Hero({ songs, loading }: { songs: SSong[]; loading: boolean }) {
   const player = usePlayer();
   const feature = songs[0];
   return (
-    <section className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-fuchsia-600/30 via-purple-700/20 to-indigo-600/30 p-5 sm:p-8">
+    <section className="relative overflow-hidden rounded-[2rem] p-5 glass-strong sm:p-8">
+      <div className="pointer-events-none absolute -top-24 -right-16 h-72 w-72 rounded-full bg-fuchsia-500/40 blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-20 -left-10 h-64 w-64 rounded-full bg-indigo-500/40 blur-3xl" />
       <div className="grid gap-6 sm:grid-cols-[1fr_auto] sm:items-center">
         <div className="min-w-0">
           <p className="text-xs font-medium uppercase tracking-[0.24em] text-fuchsia-200/80">Featured Today</p>
@@ -159,7 +161,7 @@ function Hero({ songs, loading }: { songs: SSong[]; loading: boolean }) {
             <button
               disabled={!songs.length}
               onClick={() => player.playList(songs, 0)}
-              className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-2 text-sm font-semibold text-black transition hover:scale-[1.02] disabled:opacity-40"
+              className="inline-flex items-center gap-2 rounded-full bg-gradient-to-br from-white to-white/85 px-5 py-2 text-sm font-semibold text-black shadow-lg shadow-white/20 ring-1 ring-white/60 transition hover:scale-[1.02] disabled:opacity-40"
             >
               <svg viewBox="0 0 24 24" className="h-4 w-4"><path d="M8 5v14l11-7z" fill="currentColor" /></svg>
               Play Trending
@@ -170,7 +172,7 @@ function Hero({ songs, loading }: { songs: SSong[]; loading: boolean }) {
                 const shuffled = [...songs].sort(() => Math.random() - 0.5);
                 player.playList(shuffled, 0);
               }}
-              className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-5 py-2 text-sm font-semibold text-white transition hover:bg-white/10 disabled:opacity-40"
+              className="inline-flex items-center gap-2 rounded-full px-5 py-2 text-sm font-semibold text-white transition hover:brightness-125 disabled:opacity-40 glass-chip"
             >
               <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M16 3h5v5M4 20l16-16M21 16v5h-5M4 4l5 5m6 6 6 6" strokeLinecap="round" strokeLinejoin="round" />
@@ -180,7 +182,7 @@ function Hero({ songs, loading }: { songs: SSong[]; loading: boolean }) {
           </div>
         </div>
         {feature && (
-          <div className="hidden h-40 w-40 shrink-0 overflow-hidden rounded-2xl shadow-2xl sm:block lg:h-52 lg:w-52">
+          <div className="hidden h-40 w-40 shrink-0 overflow-hidden rounded-3xl shadow-2xl ring-1 ring-white/30 sm:block lg:h-52 lg:w-52">
             <img src={pickImg(feature.image)} alt={decode(feature.name)} className="h-full w-full object-cover" />
           </div>
         )}
@@ -221,7 +223,7 @@ function PlaylistCard({ p }: { p: SPlaylist }) {
       params={{ id: p.id }}
       className="group w-40 shrink-0 snap-start sm:w-44"
     >
-      <div className="aspect-square overflow-hidden rounded-2xl bg-white/5 shadow-lg transition group-hover:-translate-y-1 group-hover:shadow-fuchsia-500/20">
+      <div className="aspect-square overflow-hidden rounded-3xl shadow-lg ring-1 ring-white/15 transition group-hover:-translate-y-1 group-hover:shadow-fuchsia-500/30 group-hover:ring-white/30">
         {pickImg(p.image) && (
           <img src={pickImg(p.image)} alt={decode(p.name)} loading="lazy" className="h-full w-full object-cover transition group-hover:scale-105" />
         )}
@@ -235,7 +237,7 @@ function PlaylistCard({ p }: { p: SPlaylist }) {
 function AlbumCard({ a }: { a: SAlbum }) {
   return (
     <Link to="/album/$id" params={{ id: a.id }} className="group w-40 shrink-0 snap-start sm:w-44">
-      <div className="aspect-square overflow-hidden rounded-2xl bg-white/5 shadow-lg transition group-hover:-translate-y-1 group-hover:shadow-fuchsia-500/20">
+      <div className="aspect-square overflow-hidden rounded-3xl shadow-lg ring-1 ring-white/15 transition group-hover:-translate-y-1 group-hover:shadow-fuchsia-500/30 group-hover:ring-white/30">
         {pickImg(a.image) && (
           <img src={pickImg(a.image)} alt={decode(a.name)} loading="lazy" className="h-full w-full object-cover transition group-hover:scale-105" />
         )}
@@ -251,7 +253,7 @@ function AlbumCard({ a }: { a: SAlbum }) {
 function ArtistCard({ a }: { a: SArtistFull }) {
   return (
     <Link to="/artist/$id" params={{ id: a.id }} className="group w-32 shrink-0 snap-start text-center sm:w-36">
-      <div className="mx-auto aspect-square overflow-hidden rounded-full bg-white/5 shadow-lg transition group-hover:-translate-y-1 group-hover:shadow-fuchsia-500/20">
+      <div className="mx-auto aspect-square overflow-hidden rounded-full shadow-lg ring-1 ring-white/20 transition group-hover:-translate-y-1 group-hover:shadow-fuchsia-500/30 group-hover:ring-white/40">
         {pickImg(a.image) && (
           <img src={pickImg(a.image)} alt={decode(a.name)} loading="lazy" className="h-full w-full object-cover transition group-hover:scale-105" />
         )}
@@ -324,7 +326,7 @@ function SearchView({ query }: { query: string }) {
       )}
 
       {!loading && !songs.length && !albums.length && !artists.length && !playlists.length && (
-        <p className="rounded-xl border border-white/10 bg-white/5 p-8 text-center text-sm text-white/50">
+        <p className="rounded-3xl p-8 text-center text-sm text-white/70 glass">
           No results found.
         </p>
       )}

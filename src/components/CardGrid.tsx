@@ -18,7 +18,7 @@ export function CardGrid({ items }: { items: Item[] }) {
           key={it.id}
           to={it.to}
           params={{ id: it.id }}
-          className="group overflow-hidden rounded-2xl border border-white/10 bg-white/5 p-3 backdrop-blur-xl transition hover:-translate-y-1 hover:border-white/20 hover:bg-white/10"
+          className="group overflow-hidden rounded-3xl p-3 glass transition hover:-translate-y-1"
         >
           <div className={`aspect-square overflow-hidden bg-white/10 ${it.round ? "rounded-full" : "rounded-xl"}`}>
             {pickImg(it.image) && (
