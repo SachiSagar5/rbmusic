@@ -81,11 +81,15 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "RB Music — Stream Music You Love" },
-      { name: "description", content: "Search, stream, download and organize music with RB Music — albums, artists, playlists, lyrics, queue, and offline listening." },
+      { name: "description", content: "Search and stream millions of songs, albums, artists and playlists instantly with RB Music." },
       { property: "og:title", content: "RB Music — Stream Music You Love" },
-      { property: "og:description", content: "Search, stream, download and organize music with RB Music." },
+      { property: "og:description", content: "Search and stream millions of songs, albums, artists and playlists instantly with RB Music." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "RB Music — Stream Music You Love" },
+      { name: "twitter:description", content: "Search and stream millions of songs, albums, artists and playlists instantly with RB Music." },
+      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/101abaab-570b-450e-aa00-5927854f0c9d" },
+      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/101abaab-570b-450e-aa00-5927854f0c9d" },
     ],
     links: [
       {

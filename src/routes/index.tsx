@@ -27,7 +27,7 @@ export const Route = createFileRoute("/")({
       { title: "RB Music — Stream Music You Love" },
       { name: "description", content: "Search and stream millions of songs, albums, artists and playlists instantly with RB Music." },
       { property: "og:title", content: "RB Music — Stream Music You Love" },
-      { property: "og:description", content: "Search and stream millions of songs instantly with RB Music." },
+      { property: "og:description", content: "Search and stream millions of songs, albums, artists and playlists instantly with RB Music." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
