@@ -1,8 +1,14 @@
 import type { SSong } from "./saavn";
+import { getUserId } from "./auth";
 
-const LIKES_KEY = "rbm:likes";
-const PL_KEY = "rbm:playlists";
-const DL_META_KEY = "rbm:downloads";
+function prefix(): string {
+  const uid = getUserId();
+  return uid ? `rbm:${uid}:` : "rbm:";
+}
+
+const LIKES_KEY = () => `${prefix()}likes`;
+const PL_KEY = () => `${prefix()}playlists`;
+const DL_META_KEY = () => `${prefix()}downloads`;
 
 export type LocalPlaylist = { id: string; name: string; songs: SSong[]; createdAt: number };
 
@@ -34,23 +40,23 @@ function write<T>(k: string, v: T) {
 }
 
 // Likes
-export const getLikes = (): SSong[] => read<SSong[]>(LIKES_KEY, []);
+export const getLikes = (): SSong[] => read<SSong[]>(LIKES_KEY(), []);
 export const isLiked = (id: string) => getLikes().some((s) => s.id === id);
 export function toggleLike(song: SSong) {
   const cur = getLikes();
   const next = cur.some((s) => s.id === song.id) ? cur.filter((s) => s.id !== song.id) : [song, ...cur];
-  write(LIKES_KEY, next);
+  write(LIKES_KEY(), next);
 }
 
 // Playlists
-export const getPlaylists = (): LocalPlaylist[] => read<LocalPlaylist[]>(PL_KEY, []);
+export const getPlaylists = (): LocalPlaylist[] => read<LocalPlaylist[]>(PL_KEY(), []);
 export function createPlaylist(name: string): LocalPlaylist {
   const p: LocalPlaylist = { id: `pl_${Date.now()}`, name, songs: [], createdAt: Date.now() };
-  write(PL_KEY, [p, ...getPlaylists()]);
+  write(PL_KEY(), [p, ...getPlaylists()]);
   return p;
 }
 export function deletePlaylist(id: string) {
-  write(PL_KEY, getPlaylists().filter((p) => p.id !== id));
+  write(PL_KEY(), getPlaylists().filter((p) => p.id !== id));
 }
 export function addSongToPlaylist(playlistId: string, song: SSong) {
   const pls = getPlaylists().map((p) =>
@@ -58,22 +64,22 @@ export function addSongToPlaylist(playlistId: string, song: SSong) {
       ? { ...p, songs: [...p.songs, song] }
       : p,
   );
-  write(PL_KEY, pls);
+  write(PL_KEY(), pls);
 }
 export function removeSongFromPlaylist(playlistId: string, songId: string) {
   const pls = getPlaylists().map((p) =>
     p.id === playlistId ? { ...p, songs: p.songs.filter((s) => s.id !== songId) } : p,
   );
-  write(PL_KEY, pls);
+  write(PL_KEY(), pls);
 }
 
 // Download metadata (blobs live in IndexedDB)
-export const getDownloadMeta = (): SSong[] => read<SSong[]>(DL_META_KEY, []);
+export const getDownloadMeta = (): SSong[] => read<SSong[]>(DL_META_KEY(), []);
 export function setDownloaded(song: SSong, on: boolean) {
   const cur = getDownloadMeta();
   const next = on
     ? cur.some((s) => s.id === song.id) ? cur : [song, ...cur]
     : cur.filter((s) => s.id !== song.id);
-  write(DL_META_KEY, next);
+  write(DL_META_KEY(), next);
 }
 export const isDownloadedMeta = (id: string) => getDownloadMeta().some((s) => s.id === id);

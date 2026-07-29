@@ -10,6 +10,7 @@ import {
 } from "react";
 import { getBlob } from "./idb";
 import { pickAudio, type SSong } from "./saavn";
+import { useDevice } from "./device";
 
 export type RepeatMode = "off" | "all" | "one";
 
@@ -39,6 +40,7 @@ type Ctx = {
   eqGains: number[];
   boost: number;
   eqError: string | null;
+  remotePlaying: boolean;
   playList: (list: SSong[], startIdx?: number) => void;
   playSong: (song: SSong) => void;
   toggle: () => void;
@@ -86,6 +88,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   const [eqGains, setEqGains] = useState<number[]>([0, 0, 0, 0, 0]);
   const [boost, setBoostState] = useState(1);
   const [eqError, setEqError] = useState<string | null>(null);
+  const [remotePlaying, setRemotePlaying] = useState(false);
   const audioCtxRef = useRef<AudioContext | null>(null);
   const srcNodeRef = useRef<MediaElementAudioSourceNode | null>(null);
   const filtersRef = useRef<BiquadFilterNode[]>([]);
@@ -93,11 +96,14 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   const objectUrlRef = useRef<string | null>(null);
 
   const current = index >= 0 && index < queue.length ? queue[index] : null;
+  const dev = useDevice();
 
   useEffect(() => {
     if (!audioRef.current) return;
     audioRef.current.volume = volume;
   }, [volume]);
+
+  const isRemote = dev.mode === "remote" && !!dev.activeDeviceId;
 
   const enableEq = useCallback(async () => {
     const a = audioRef.current;
@@ -194,10 +200,15 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   };
 
   const loadAndPlay = useCallback(async (song: SSong) => {
+    if (isRemote && dev.activeDeviceId) {
+      await dev.playOnDevice(dev.activeDeviceId, song, 0);
+      setPlaying(false);
+      setRemotePlaying(true);
+      return;
+    }
     const a = audioRef.current;
     if (!a) return;
     revokeObjectUrl();
-    // Prefer offline blob if present
     const blob = await getBlob(song.id).catch(() => undefined);
     let src = "";
     if (blob) {
@@ -214,15 +225,14 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     } catch {
       setPlaying(false);
     }
-  }, []);
+  }, [isRemote, dev]);
 
   // Load whenever current changes (by id)
   const currentId = current?.id;
   useEffect(() => {
     if (!current) return;
     loadAndPlay(current);
-    // Media Session for mobile lock-screen controls
-    if ("mediaSession" in navigator) {
+    if (!isRemote && "mediaSession" in navigator) {
       try {
         navigator.mediaSession.metadata = new MediaMetadata({
           title: current.name,
@@ -234,7 +244,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     }
     return revokeObjectUrl;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentId]);
+  }, [currentId, isRemote]);
 
   const playList = useCallback((list: SSong[], startIdx = 0) => {
     if (!list.length) return;
@@ -255,6 +265,16 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const toggle = useCallback(() => {
+    if (isRemote && dev.activeDeviceId) {
+      if (remotePlaying) {
+        dev.pauseDevice(dev.activeDeviceId);
+        setRemotePlaying(false);
+      } else {
+        dev.resumeDevice(dev.activeDeviceId);
+        setRemotePlaying(true);
+      }
+      return;
+    }
     const a = audioRef.current;
     if (!a || !current) return;
     if (a.paused) {
@@ -263,7 +283,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       a.pause();
       setPlaying(false);
     }
-  }, [current]);
+  }, [current, isRemote, dev, remotePlaying]);
 
   const advance = useCallback(
     (dir: 1 | -1) => {
@@ -296,9 +316,14 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   }, [advance]);
 
   const seek = useCallback((t: number) => {
+    if (isRemote && dev.activeDeviceId) {
+      dev.seekDevice(dev.activeDeviceId, t);
+      setProgress(t);
+      return;
+    }
     if (audioRef.current) audioRef.current.currentTime = t;
     setProgress(t);
-  }, []);
+  }, [isRemote, dev]);
 
   const setVolume = useCallback((v: number) => setVolumeState(v), []);
   const toggleShuffle = useCallback(() => setShuffle((s) => !s), []);
@@ -365,6 +390,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       eqGains,
       boost,
       eqError,
+      remotePlaying,
       playList,
       playSong,
       toggle,
@@ -386,7 +412,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       applyEqPreset,
       setBoost,
     }),
-    [queue, index, current, playing, progress, duration, volume, shuffle, repeat, showQueue, showLyrics, showEq, eqEnabled, eqGains, boost, eqError, playList, playSong, toggle, next, prev, seek, setVolume, toggleShuffle, cycleRepeat, addToQueue, removeFromQueue, jumpTo, enableEq, disableEq, setEqBand, applyEqPreset, setBoost],
+    [queue, index, current, playing, progress, duration, volume, shuffle, repeat, showQueue, showLyrics, showEq, eqEnabled, eqGains, boost, eqError, remotePlaying, playList, playSong, toggle, next, prev, seek, setVolume, toggleShuffle, cycleRepeat, addToQueue, removeFromQueue, jumpTo, enableEq, disableEq, setEqBand, applyEqPreset, setBoost],
   );
 
   return (

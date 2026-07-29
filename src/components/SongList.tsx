@@ -14,6 +14,8 @@ import {
 } from "@/lib/library";
 import { hasBlob, putBlob, delBlob } from "@/lib/idb";
 import { pickAudio } from "@/lib/saavn";
+import { CastBtn } from "./CastBtn";
+import { useDevice } from "@/lib/device";
 
 function useLibVersion() {
   const [v, setV] = useState(0);
@@ -61,9 +63,17 @@ export function SongList({
   onExtraAction?: (song: SSong) => React.ReactNode;
 }) {
   const player = usePlayer();
+  const dev = useDevice();
   const libV = useLibVersion();
   const [dlIds, setDlIds] = useState<Set<string>>(new Set());
   const [busy, setBusy] = useState<Record<string, "dl" | "err" | undefined>>({});
+
+  const qlabel = (s: SSong) => {
+    const has = (q: string) => s.downloadUrl?.some((u) => u.quality === q);
+    if (has("320kbps")) return "HD";
+    if (has("160kbps")) return "SD";
+    return null;
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -86,9 +96,10 @@ export function SongList({
         return (
           <li
             key={s.id}
-            className={`group flex items-center gap-3 px-3 py-2 sm:px-4 ${
+            className={`group flex items-center gap-3 px-3 py-2 sm:px-4 animate-in fade-in ${
               isCurrent ? "bg-white/10" : "hover:bg-white/5"
             }`}
+            style={{ animationDelay: `${(i % 20) * 30}ms` }}
           >
             <button
               onClick={() => player.playList(songs, i)}
@@ -128,6 +139,11 @@ export function SongList({
             <span className="hidden w-16 text-right text-xs tabular-nums text-white/40 sm:block">
               {fmtTime(s.duration)}
             </span>
+            {qlabel(s) && (
+              <span className="hidden rounded bg-fuchsia-500/15 px-1.5 py-0.5 text-[10px] font-semibold text-fuchsia-300 ring-1 ring-fuchsia-500/25 sm:inline">
+                {qlabel(s)}
+              </span>
+            )}
             <div className="flex items-center gap-1">
               <IconBtn
                 title={liked ? "Unlike" : "Like"}
@@ -187,6 +203,7 @@ export function SongList({
                   <path d="M4 6h11M4 12h11M4 18h7M17 15v6m-3-3h6" strokeLinecap="round" />
                 </svg>
               </IconBtn>
+              <CastBtn onCast={() => { if (dev.activeDeviceId) dev.playOnDevice(dev.activeDeviceId, s); }} />
               {onExtraAction?.(s)}
             </div>
           </li>

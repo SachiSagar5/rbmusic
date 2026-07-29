@@ -3,6 +3,7 @@ import { Link } from "@tanstack/react-router";
 import { usePlayer } from "@/lib/player";
 import { EQ_BANDS, EQ_PRESETS } from "@/lib/player";
 import { decode, fmtTime, getLyrics, pickImg, type Lyrics } from "@/lib/saavn";
+import { DeviceSelector } from "./DeviceSelector";
 
 export function PlayerBar() {
   const p = usePlayer();
@@ -14,8 +15,8 @@ export function PlayerBar() {
       {p.showQueue && <QueueDrawer />}
       {p.showLyrics && <LyricsDrawer />}
       {p.showEq && <EqDrawer />}
-      <div className="fixed inset-x-0 bottom-0 z-30 pb-[env(safe-area-inset-bottom)]">
-        <div className="mx-3 mb-3 rounded-3xl glass-panel sm:mx-6">
+      {c && <div className="fixed inset-x-0 bottom-0 z-30 pb-[env(safe-area-inset-bottom)] animate-in slide-in-from-bottom-4 fade-in duration-300">
+        <div className="mx-1 mb-1 rounded-2xl glass-panel sm:mx-2 md:mx-auto md:w-[60%]">
         {/* Progress on very top for mobile */}
         <input
           type="range"
@@ -27,7 +28,7 @@ export function PlayerBar() {
           aria-label="Seek"
           className="block h-1 w-full touch-none accent-fuchsia-400 sm:hidden"
         />
-        <div className="mx-auto grid max-w-7xl grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-3 py-2 sm:flex sm:gap-4 sm:px-6 sm:py-3">
+        <div className="mx-auto grid max-w-3xl grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-3 py-2 sm:flex sm:gap-4 sm:px-6 sm:py-3">
           {/* Track info */}
           <div className="flex min-w-0 items-center gap-3 sm:flex-1">
             <div className="h-12 w-12 shrink-0 overflow-hidden rounded-2xl bg-white/10 ring-1 ring-white/20 sm:h-14 sm:w-14">
@@ -69,7 +70,9 @@ export function PlayerBar() {
                 <svg viewBox="0 0 24 24" className="h-5 w-5"><path d="M6 6h2v12H6zM20 6v12l-10-6z" fill="currentColor"/></svg>
               </button>
               <button onClick={p.toggle} disabled={!c} aria-label={p.playing ? "Pause" : "Play"}
-                className="grid h-11 w-11 place-items-center rounded-full bg-gradient-to-br from-white to-white/80 text-black shadow-lg shadow-white/20 ring-1 ring-white/60 transition active:scale-95 hover:scale-105 disabled:opacity-30">
+                className={`grid h-11 w-11 place-items-center rounded-full bg-gradient-to-br from-white to-white/80 text-black shadow-lg shadow-white/20 ring-1 transition active:scale-95 hover:scale-105 disabled:opacity-30 ${
+                  p.playing ? "ring-fuchsia-300/60 animate-pulse" : "ring-white/60"
+                }`}>
                 {p.playing ? (
                   <svg viewBox="0 0 24 24" className="h-5 w-5"><rect x="6" y="5" width="4" height="14" fill="currentColor"/><rect x="14" y="5" width="4" height="14" fill="currentColor"/></svg>
                 ) : (
@@ -110,8 +113,9 @@ export function PlayerBar() {
             </div>
           </div>
 
-          {/* Right: queue, lyrics, volume */}
+          {/* Right: device, queue, lyrics, volume */}
           <div className="hidden items-center gap-2 md:flex">
+            <DeviceSelector />
             <ToggleIcon on={p.showLyrics} title="Lyrics" onClick={() => p.setShowLyrics(!p.showLyrics)}>
               <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M4 6h16M4 12h10M4 18h16" strokeLinecap="round" />
@@ -134,8 +138,9 @@ export function PlayerBar() {
                 className="h-1 flex-1 touch-none accent-fuchsia-400" />
             </div>
           </div>
-          {/* Mobile right: queue/lyrics toggles */}
+          {/* Mobile right: device, queue/lyrics toggles */}
           <div className="flex items-center gap-1 md:hidden">
+            <DeviceSelector />
             <ToggleIcon on={p.showLyrics} title="Lyrics" onClick={() => p.setShowLyrics(!p.showLyrics)}>
               <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M4 6h16M4 12h10M4 18h16" strokeLinecap="round" />
@@ -154,7 +159,7 @@ export function PlayerBar() {
           </div>
         </div>
         </div>
-      </div>
+      </div>}
     </>
   );
 }

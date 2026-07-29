@@ -12,9 +12,11 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { PlayerProvider } from "@/lib/player";
+import { DeviceProvider } from "@/lib/device";
 import { AppHeader } from "@/components/AppHeader";
 import { PlayerBar } from "@/components/PlayerBar";
 import { NowPlayingBackdrop } from "@/components/NowPlayingBackdrop";
+import { AuthProvider } from "@/lib/auth";
 
 function NotFoundComponent() {
   return (
@@ -97,7 +99,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         rel: "stylesheet",
         href: appCss,
       },
-      { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
+      { rel: "icon", href: "/favicon.svg", type: "image/svg+xml" },
+      { rel: "alternate icon", href: "/favicon.ico", type: "image/x-icon" },
     ],
   }),
   shellComponent: RootShell,
@@ -125,23 +128,33 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <PlayerProvider>
-        <div className="relative min-h-screen overflow-hidden bg-[#07040f] text-white">
-          <NowPlayingBackdrop />
-          {/* Liquid glass ambient background */}
-          <div className="pointer-events-none fixed -top-40 -left-32 h-[620px] w-[620px] rounded-full bg-fuchsia-500/40 blur-[120px]" />
-          <div className="pointer-events-none fixed top-40 right-0 h-[520px] w-[520px] rounded-full bg-indigo-500/35 blur-[110px]" />
-          <div className="pointer-events-none fixed bottom-0 left-1/3 h-[480px] w-[480px] rounded-full bg-cyan-400/20 blur-[120px]" />
-          <div className="pointer-events-none fixed -bottom-20 right-1/4 h-[420px] w-[420px] rounded-full bg-pink-500/25 blur-[100px]" />
-          <div className="relative z-10">
-            <AppHeader />
-            <main className="mx-auto max-w-7xl px-4 pb-48 pt-6 sm:px-6 sm:pb-40">
-              <Outlet />
-            </main>
+      <DeviceProvider>
+        <PlayerProvider>
+          <AuthProvider>
+            <div className="relative min-h-screen overflow-hidden bg-[#07040f] text-white">
+            <NowPlayingBackdrop />
+            {/* Liquid glass ambient background */}
+            <div className="pointer-events-none fixed -top-40 -left-32 h-[620px] w-[620px] rounded-full bg-fuchsia-500/40 blur-[120px]" />
+            <div className="pointer-events-none fixed top-40 right-0 h-[520px] w-[520px] rounded-full bg-indigo-500/35 blur-[110px]" />
+            <div className="pointer-events-none fixed bottom-0 left-1/3 h-[480px] w-[480px] rounded-full bg-cyan-400/20 blur-[120px]" />
+            <div className="pointer-events-none fixed -bottom-20 right-1/4 h-[420px] w-[420px] rounded-full bg-pink-500/25 blur-[100px]" />
+            <div className="relative z-10">
+              <AppHeader />
+              <main className="mx-3 max-w-7xl px-4 pb-48 pt-6 sm:mx-auto sm:px-6 sm:pb-40">
+                <Outlet />
+              </main>
+            </div>
+            <PlayerBar />
           </div>
-          <PlayerBar />
-        </div>
-      </PlayerProvider>
+          <p className="fixed inset-x-0 bottom-0 z-20 pb-6 text-center text-[10px] leading-none text-white/30 sm:pb-7">
+            Developed by{" "}
+            <a href="https://t.me/zukosgr" target="_blank" rel="noopener noreferrer" className="text-fuchsia-300/60 hover:text-fuchsia-300 transition-colors">
+              @zukosgr
+            </a>
+          </p>
+          </AuthProvider>
+        </PlayerProvider>
+      </DeviceProvider>
     </QueryClientProvider>
   );
 }
