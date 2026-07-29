@@ -1,0 +1,241 @@
+import { Link } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
+import { usePlayer } from "@/lib/player";
+import { decode, fmtTime, pickImg, type SSong } from "@/lib/saavn";
+import {
+  addSongToPlaylist,
+  getPlaylists,
+  isLiked,
+  setDownloaded,
+  subscribeLibrary,
+  toggleLike,
+  isDownloadedMeta,
+} from "@/lib/library";
+import { hasBlob, putBlob, delBlob } from "@/lib/idb";
+import { pickAudio } from "@/lib/saavn";
+
+function useLibVersion() {
+  const [v, setV] = useState(0);
+  useEffect(() => subscribeLibrary(() => setV((x) => x + 1)), []);
+  return v;
+}
+
+async function downloadSong(song: SSong) {
+  const url = pickAudio(song.downloadUrl);
+  if (!url) throw new Error("No audio URL");
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`Download failed (${res.status})`);
+  const blob = await res.blob();
+  await putBlob(song.id, blob);
+  setDownloaded(song, true);
+}
+
+async function removeDownload(song: SSong) {
+  await delBlob(song.id);
+  setDownloaded(song, false);
+}
+
+export function SongList({
+  songs,
+  onExtraAction,
+}: {
+  songs: SSong[];
+  onExtraAction?: (song: SSong) => React.ReactNode;
+}) {
+  const player = usePlayer();
+  const libV = useLibVersion();
+  const [dlIds, setDlIds] = useState<Set<string>>(new Set());
+  const [busy, setBusy] = useState<Record<string, "dl" | "err" | undefined>>({});
+
+  useEffect(() => {
+    let cancelled = false;
+    Promise.all(songs.map(async (s) => ((await hasBlob(s.id)) ? s.id : null))).then((ids) => {
+      if (cancelled) return;
+      setDlIds(new Set(ids.filter(Boolean) as string[]));
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [songs, libV]);
+
+  return (
+    <ul className="divide-y divide-white/5 rounded-2xl border border-white/10 bg-white/5">
+      {songs.map((s, i) => {
+        const isCurrent = player.current?.id === s.id;
+        const liked = isLiked(s.id);
+        const downloaded = dlIds.has(s.id) || isDownloadedMeta(s.id);
+        const state = busy[s.id];
+        return (
+          <li
+            key={s.id}
+            className={`group flex items-center gap-3 px-3 py-2 sm:px-4 ${
+              isCurrent ? "bg-white/10" : "hover:bg-white/5"
+            }`}
+          >
+            <button
+              onClick={() => player.playList(songs, i)}
+              className="grid h-10 w-10 shrink-0 place-items-center overflow-hidden rounded-lg bg-white/10"
+              aria-label={`Play ${decode(s.name)}`}
+            >
+              <img src={pickImg(s.image)} alt="" className="h-full w-full object-cover" loading="lazy" />
+            </button>
+            <button
+              onClick={() => player.playList(songs, i)}
+              className="min-w-0 flex-1 text-left"
+            >
+              <p className={`line-clamp-1 text-sm font-semibold ${isCurrent ? "text-fuchsia-300" : "text-white"}`}>
+                {decode(s.name)}
+              </p>
+              <p className="line-clamp-1 text-xs text-white/50">
+                {s.artists?.primary?.map((a, idx) => (
+                  <span key={a.id}>
+                    {idx > 0 && ", "}
+                    <Link
+                      to="/artist/$id"
+                      params={{ id: a.id }}
+                      onClick={(e) => e.stopPropagation()}
+                      className="hover:text-white hover:underline"
+                    >
+                      {a.name}
+                    </Link>
+                  </span>
+                ))}
+              </p>
+            </button>
+            <span className="hidden w-16 text-right text-xs tabular-nums text-white/40 sm:block">
+              {fmtTime(s.duration)}
+            </span>
+            <div className="flex items-center gap-1">
+              <IconBtn
+                title={liked ? "Unlike" : "Like"}
+                onClick={() => toggleLike(s)}
+                active={liked}
+              >
+                <svg viewBox="0 0 24 24" className="h-4 w-4" fill={liked ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2">
+                  <path d="M12 21s-7-4.35-9.5-8.5C.9 9.5 2.5 5 6.5 5c2 0 3.5 1.2 5.5 3.5C13.5 6.2 15 5 17 5c4 0 5.6 4.5 4 7.5C19 16.65 12 21 12 21z" />
+                </svg>
+              </IconBtn>
+              <IconBtn
+                title={downloaded ? "Remove download" : "Download"}
+                active={downloaded}
+                onClick={async () => {
+                  if (downloaded) {
+                    await removeDownload(s);
+                    setDlIds((prev) => {
+                      const nx = new Set(prev);
+                      nx.delete(s.id);
+                      return nx;
+                    });
+                  } else {
+                    setBusy((b) => ({ ...b, [s.id]: "dl" }));
+                    try {
+                      await downloadSong(s);
+                      setDlIds((prev) => new Set(prev).add(s.id));
+                    } catch {
+                      setBusy((b) => ({ ...b, [s.id]: "err" }));
+                      setTimeout(() => setBusy((b) => ({ ...b, [s.id]: undefined })), 2500);
+                      return;
+                    }
+                    setBusy((b) => ({ ...b, [s.id]: undefined }));
+                  }
+                }}
+              >
+                {state === "dl" ? (
+                  <span className="block h-3 w-3 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                ) : state === "err" ? (
+                  <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M12 8v5m0 3v.01" strokeLinecap="round" />
+                    <circle cx="12" cy="12" r="9" />
+                  </svg>
+                ) : downloaded ? (
+                  <svg viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor">
+                    <path d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z" />
+                  </svg>
+                ) : (
+                  <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M12 4v12m0 0-4-4m4 4 4-4" strokeLinecap="round" strokeLinejoin="round" />
+                    <path d="M4 20h16" strokeLinecap="round" />
+                  </svg>
+                )}
+              </IconBtn>
+              <AddToPlaylistMenu song={s} />
+              <IconBtn title="Add to queue" onClick={() => player.addToQueue(s)}>
+                <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M4 6h11M4 12h11M4 18h7M17 15v6m-3-3h6" strokeLinecap="round" />
+                </svg>
+              </IconBtn>
+              {onExtraAction?.(s)}
+            </div>
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
+
+function IconBtn({
+  children,
+  onClick,
+  title,
+  active,
+}: {
+  children: React.ReactNode;
+  onClick: (e: React.MouseEvent) => void;
+  title: string;
+  active?: boolean;
+}) {
+  return (
+    <button
+      title={title}
+      aria-label={title}
+      onClick={(e) => {
+        e.stopPropagation();
+        onClick(e);
+      }}
+      className={`grid h-8 w-8 place-items-center rounded-full transition ${
+        active ? "text-fuchsia-300" : "text-white/60 hover:bg-white/10 hover:text-white"
+      }`}
+    >
+      {children}
+    </button>
+  );
+}
+
+function AddToPlaylistMenu({ song }: { song: SSong }) {
+  const [open, setOpen] = useState(false);
+  const libV = useLibVersion();
+  const pls = getPlaylists();
+  void libV;
+  return (
+    <div className="relative">
+      <IconBtn title="Add to playlist" onClick={() => setOpen((v) => !v)}>
+        <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
+          <path d="M12 5v14m-7-7h14" strokeLinecap="round" />
+        </svg>
+      </IconBtn>
+      {open && (
+        <>
+          <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
+          <div className="absolute right-0 z-50 mt-1 w-56 overflow-hidden rounded-xl border border-white/10 bg-[#150e26] p-1 shadow-2xl">
+            {pls.length === 0 ? (
+              <p className="px-3 py-2 text-xs text-white/50">No playlists yet. Create one in Library.</p>
+            ) : (
+              pls.map((p) => (
+                <button
+                  key={p.id}
+                  onClick={() => {
+                    addSongToPlaylist(p.id, song);
+                    setOpen(false);
+                  }}
+                  className="block w-full truncate rounded-lg px-3 py-1.5 text-left text-sm text-white/80 hover:bg-white/10 hover:text-white"
+                >
+                  {p.name}
+                </button>
+              ))
+            )}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
