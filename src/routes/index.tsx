@@ -2,13 +2,16 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { z } from "zod";
+import { Link } from "@tanstack/react-router";
 import { SongList } from "@/components/SongList";
-import { CardGrid } from "@/components/CardGrid";
+import { usePlayer } from "@/lib/player";
 import {
   searchAlbums,
   searchArtists,
   searchPlaylists,
   searchSongs,
+  decode,
+  pickImg,
   type SAlbum,
   type SArtistFull,
   type SPlaylist,
@@ -35,36 +38,247 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
-const CHIPS = ["Trending", "Arijit Singh", "Weeknd", "Taylor Swift", "Lofi", "Bollywood", "Punjabi", "Dua Lipa"];
-const TABS = [
-  { id: "songs", label: "Songs" },
-  { id: "albums", label: "Albums" },
-  { id: "artists", label: "Artists" },
-  { id: "playlists", label: "Playlists" },
-] as const;
-
 function Index() {
-  const { q, tab } = Route.useSearch();
-  const navigate = Route.useNavigate();
-  const query = q || "Trending";
-  const activeTab = (["songs", "albums", "artists", "playlists"] as const).includes(tab as (typeof TABS)[number]["id"])
-    ? (tab as (typeof TABS)[number]["id"])
-    : "songs";
+  const { q } = Route.useSearch();
+  if (q && q.trim()) return <SearchView query={q.trim()} />;
+  return <HomeView />;
+}
 
-  const [songs, setSongs] = useState<SSong[]>([]);
-  const [albums, setAlbums] = useState<SAlbum[]>([]);
-  const [artists, setArtists] = useState<SArtistFull[]>([]);
-  const [playlists, setPlaylists] = useState<SPlaylist[]>([]);
-  const [loading, setLoading] = useState(false);
+/* ---------------- HOME (JioSaavn-style rows) ---------------- */
+
+type Home = {
+  trending: SSong[];
+  charts: SPlaylist[];
+  newReleases: SAlbum[];
+  bollywood: SPlaylist[];
+  english: SPlaylist[];
+  punjabi: SPlaylist[];
+  romance: SPlaylist[];
+  artists: SArtistFull[];
+};
+
+function HomeView() {
+  const [data, setData] = useState<Home | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let ignore = false;
     setLoading(true);
     Promise.all([
-      searchSongs(query, 24).catch(() => [] as SSong[]),
-      searchAlbums(query, 18).catch(() => [] as SAlbum[]),
-      searchArtists(query, 18).catch(() => [] as SArtistFull[]),
-      searchPlaylists(query, 18).catch(() => [] as SPlaylist[]),
+      searchSongs("Trending", 20).catch(() => [] as SSong[]),
+      searchPlaylists("Top Charts", 12).catch(() => [] as SPlaylist[]),
+      searchAlbums("New Releases", 12).catch(() => [] as SAlbum[]),
+      searchPlaylists("Bollywood Hits", 12).catch(() => [] as SPlaylist[]),
+      searchPlaylists("English Top", 12).catch(() => [] as SPlaylist[]),
+      searchPlaylists("Punjabi Hits", 12).catch(() => [] as SPlaylist[]),
+      searchPlaylists("Romantic", 12).catch(() => [] as SPlaylist[]),
+      searchArtists("Top Artists", 14).catch(() => [] as SArtistFull[]),
+    ]).then(([trending, charts, newReleases, bollywood, english, punjabi, romance, artists]) => {
+      if (ignore) return;
+      setData({ trending, charts, newReleases, bollywood, english, punjabi, romance, artists });
+      setLoading(false);
+    });
+    return () => {
+      ignore = true;
+    };
+  }, []);
+
+  return (
+    <div className="space-y-10">
+      <Hero songs={data?.trending ?? []} loading={loading} />
+
+      {data?.trending?.length ? (
+        <section>
+          <RowHeader title="Trending Now" />
+          <SongList songs={data.trending.slice(0, 8)} />
+        </section>
+      ) : null}
+
+      <Row title="Top Charts" loading={loading}>
+        {data?.charts.map((p) => (
+          <PlaylistCard key={p.id} p={p} />
+        ))}
+      </Row>
+
+      <Row title="New Releases" loading={loading}>
+        {data?.newReleases.map((a) => (
+          <AlbumCard key={a.id} a={a} />
+        ))}
+      </Row>
+
+      <Row title="Bollywood Hits" loading={loading}>
+        {data?.bollywood.map((p) => (
+          <PlaylistCard key={p.id} p={p} />
+        ))}
+      </Row>
+
+      <Row title="English Top" loading={loading}>
+        {data?.english.map((p) => (
+          <PlaylistCard key={p.id} p={p} />
+        ))}
+      </Row>
+
+      <Row title="Popular Artists" loading={loading}>
+        {data?.artists.map((a) => (
+          <ArtistCard key={a.id} a={a} />
+        ))}
+      </Row>
+
+      <Row title="Punjabi Hits" loading={loading}>
+        {data?.punjabi.map((p) => (
+          <PlaylistCard key={p.id} p={p} />
+        ))}
+      </Row>
+
+      <Row title="Romantic Moods" loading={loading}>
+        {data?.romance.map((p) => (
+          <PlaylistCard key={p.id} p={p} />
+        ))}
+      </Row>
+    </div>
+  );
+}
+
+function Hero({ songs, loading }: { songs: SSong[]; loading: boolean }) {
+  const player = usePlayer();
+  const feature = songs[0];
+  return (
+    <section className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-fuchsia-600/30 via-purple-700/20 to-indigo-600/30 p-5 sm:p-8">
+      <div className="grid gap-6 sm:grid-cols-[1fr_auto] sm:items-center">
+        <div className="min-w-0">
+          <p className="text-xs font-medium uppercase tracking-[0.24em] text-fuchsia-200/80">Featured Today</p>
+          <h1 className="mt-2 text-3xl font-bold leading-tight tracking-tight sm:text-5xl">
+            {feature ? decode(feature.name) : "Millions of songs, one tap away"}
+          </h1>
+          <p className="mt-3 line-clamp-2 max-w-xl text-sm text-white/70 sm:text-base">
+            {feature
+              ? feature.artists?.primary?.map((a) => a.name).join(", ")
+              : "Search any artist, album or track. RB Music streams instantly — no signup, no ads."}
+          </p>
+          <div className="mt-5 flex flex-wrap gap-2">
+            <button
+              disabled={!songs.length}
+              onClick={() => player.playList(songs, 0)}
+              className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-2 text-sm font-semibold text-black transition hover:scale-[1.02] disabled:opacity-40"
+            >
+              <svg viewBox="0 0 24 24" className="h-4 w-4"><path d="M8 5v14l11-7z" fill="currentColor" /></svg>
+              Play Trending
+            </button>
+            <button
+              disabled={!songs.length}
+              onClick={() => {
+                const shuffled = [...songs].sort(() => Math.random() - 0.5);
+                player.playList(shuffled, 0);
+              }}
+              className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-5 py-2 text-sm font-semibold text-white transition hover:bg-white/10 disabled:opacity-40"
+            >
+              <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M16 3h5v5M4 20l16-16M21 16v5h-5M4 4l5 5m6 6 6 6" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+              Shuffle
+            </button>
+          </div>
+        </div>
+        {feature && (
+          <div className="hidden h-40 w-40 shrink-0 overflow-hidden rounded-2xl shadow-2xl sm:block lg:h-52 lg:w-52">
+            <img src={pickImg(feature.image)} alt={decode(feature.name)} className="h-full w-full object-cover" />
+          </div>
+        )}
+      </div>
+      {loading && !feature && <div className="mt-4 h-4 w-40 animate-pulse rounded bg-white/10" />}
+    </section>
+  );
+}
+
+function RowHeader({ title }: { title: string }) {
+  return (
+    <div className="mb-4 flex items-baseline justify-between">
+      <h2 className="text-lg font-bold tracking-tight sm:text-xl">{title}</h2>
+    </div>
+  );
+}
+
+function Row({ title, loading, children }: { title: string; loading: boolean; children: React.ReactNode }) {
+  const items = Array.isArray(children) ? children : [children];
+  return (
+    <section>
+      <RowHeader title={title} />
+      <div className="-mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2 sm:mx-0 sm:px-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        {loading
+          ? Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="h-40 w-40 shrink-0 animate-pulse rounded-2xl bg-white/5 sm:h-44 sm:w-44" />
+            ))
+          : items}
+      </div>
+    </section>
+  );
+}
+
+function PlaylistCard({ p }: { p: SPlaylist }) {
+  return (
+    <Link
+      to="/playlist/$id"
+      params={{ id: p.id }}
+      className="group w-40 shrink-0 snap-start sm:w-44"
+    >
+      <div className="aspect-square overflow-hidden rounded-2xl bg-white/5 shadow-lg transition group-hover:-translate-y-1 group-hover:shadow-fuchsia-500/20">
+        {pickImg(p.image) && (
+          <img src={pickImg(p.image)} alt={decode(p.name)} loading="lazy" className="h-full w-full object-cover transition group-hover:scale-105" />
+        )}
+      </div>
+      <p className="mt-2 line-clamp-1 text-sm font-semibold text-white">{decode(p.name)}</p>
+      {p.songCount ? <p className="line-clamp-1 text-xs text-white/50">{p.songCount} songs</p> : null}
+    </Link>
+  );
+}
+
+function AlbumCard({ a }: { a: SAlbum }) {
+  return (
+    <Link to="/album/$id" params={{ id: a.id }} className="group w-40 shrink-0 snap-start sm:w-44">
+      <div className="aspect-square overflow-hidden rounded-2xl bg-white/5 shadow-lg transition group-hover:-translate-y-1 group-hover:shadow-fuchsia-500/20">
+        {pickImg(a.image) && (
+          <img src={pickImg(a.image)} alt={decode(a.name)} loading="lazy" className="h-full w-full object-cover transition group-hover:scale-105" />
+        )}
+      </div>
+      <p className="mt-2 line-clamp-1 text-sm font-semibold text-white">{decode(a.name)}</p>
+      <p className="line-clamp-1 text-xs text-white/50">
+        {a.artists?.primary?.map((x) => x.name).join(", ") ?? a.year}
+      </p>
+    </Link>
+  );
+}
+
+function ArtistCard({ a }: { a: SArtistFull }) {
+  return (
+    <Link to="/artist/$id" params={{ id: a.id }} className="group w-32 shrink-0 snap-start text-center sm:w-36">
+      <div className="mx-auto aspect-square overflow-hidden rounded-full bg-white/5 shadow-lg transition group-hover:-translate-y-1 group-hover:shadow-fuchsia-500/20">
+        {pickImg(a.image) && (
+          <img src={pickImg(a.image)} alt={decode(a.name)} loading="lazy" className="h-full w-full object-cover transition group-hover:scale-105" />
+        )}
+      </div>
+      <p className="mt-2 line-clamp-1 text-sm font-semibold text-white">{decode(a.name)}</p>
+      <p className="text-xs text-white/50">Artist</p>
+    </Link>
+  );
+}
+
+/* ---------------- SEARCH (kept when ?q= is set) ---------------- */
+
+function SearchView({ query }: { query: string }) {
+  const [songs, setSongs] = useState<SSong[]>([]);
+  const [albums, setAlbums] = useState<SAlbum[]>([]);
+  const [artists, setArtists] = useState<SArtistFull[]>([]);
+  const [playlists, setPlaylists] = useState<SPlaylist[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let ignore = false;
+    setLoading(true);
+    Promise.all([
+      searchSongs(query, 20).catch(() => [] as SSong[]),
+      searchAlbums(query, 12).catch(() => [] as SAlbum[]),
+      searchArtists(query, 12).catch(() => [] as SArtistFull[]),
+      searchPlaylists(query, 12).catch(() => [] as SPlaylist[]),
     ]).then(([s, al, ar, pl]) => {
       if (ignore) return;
       setSongs(s);
@@ -79,107 +293,41 @@ function Index() {
   }, [query]);
 
   return (
-    <div>
-      <section className="max-w-3xl">
-        <p className="text-sm font-medium uppercase tracking-[0.2em] text-fuchsia-300/80">Now playing everywhere</p>
-        <h1 className="mt-3 text-4xl font-bold leading-[1.05] tracking-tight sm:text-6xl">
-          Millions of songs.
-          <span className="block bg-gradient-to-r from-fuchsia-400 via-pink-400 to-indigo-400 bg-clip-text text-transparent">
-            One tap to play.
-          </span>
-        </h1>
-        <p className="mt-5 max-w-xl text-sm text-white/60 sm:text-base">
-          Search any artist, album or track. RB Music streams instantly — no signup, no ads.
+    <div className="space-y-10">
+      <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
+        {loading ? "Searching…" : `Results for "${query}"`}
+      </h1>
+
+      {!!songs.length && (
+        <section>
+          <RowHeader title="Songs" />
+          <SongList songs={songs.slice(0, 10)} />
+        </section>
+      )}
+
+      {!!albums.length && (
+        <Row title="Albums" loading={false}>
+          {albums.map((a) => <AlbumCard key={a.id} a={a} />)}
+        </Row>
+      )}
+
+      {!!artists.length && (
+        <Row title="Artists" loading={false}>
+          {artists.map((a) => <ArtistCard key={a.id} a={a} />)}
+        </Row>
+      )}
+
+      {!!playlists.length && (
+        <Row title="Playlists" loading={false}>
+          {playlists.map((p) => <PlaylistCard key={p.id} p={p} />)}
+        </Row>
+      )}
+
+      {!loading && !songs.length && !albums.length && !artists.length && !playlists.length && (
+        <p className="rounded-xl border border-white/10 bg-white/5 p-8 text-center text-sm text-white/50">
+          No results found.
         </p>
-
-        <div className="mt-6 flex flex-wrap gap-2">
-          {CHIPS.map((c) => (
-            <button
-              key={c}
-              onClick={() => navigate({ search: { q: c, tab: activeTab } })}
-              className={`rounded-full border px-4 py-1.5 text-xs font-medium transition ${
-                query === c
-                  ? "border-fuchsia-400/60 bg-fuchsia-500/20 text-white"
-                  : "border-white/10 bg-white/5 text-white/70 hover:bg-white/10"
-              }`}
-            >
-              {c}
-            </button>
-          ))}
-        </div>
-      </section>
-
-      <section className="mt-10">
-        <div className="mb-5 flex items-baseline justify-between">
-          <h2 className="truncate pr-3 text-base font-semibold sm:text-lg">
-            {loading ? "Searching…" : `Results for "${query}"`}
-          </h2>
-        </div>
-
-        <div className="mb-5 flex gap-1 overflow-x-auto rounded-xl border border-white/10 bg-white/5 p-1">
-          {TABS.map((t) => (
-            <button
-              key={t.id}
-              onClick={() => navigate({ search: { q: query, tab: t.id } })}
-              className={`shrink-0 rounded-lg px-4 py-1.5 text-sm font-medium transition ${
-                activeTab === t.id ? "bg-white/10 text-white" : "text-white/60 hover:text-white"
-              }`}
-            >
-              {t.label}
-            </button>
-          ))}
-        </div>
-
-        {loading ? (
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-            {Array.from({ length: 8 }).map((_, i) => (
-              <div key={i} className="aspect-square animate-pulse rounded-2xl bg-white/5" />
-            ))}
-          </div>
-        ) : activeTab === "songs" ? (
-          songs.length ? <SongList songs={songs} /> : <Empty label="No songs found." />
-        ) : activeTab === "albums" ? (
-          albums.length ? (
-            <CardGrid
-              items={albums.map((a) => ({
-                id: a.id,
-                name: a.name,
-                image: a.image,
-                subtitle: a.artists?.primary?.map((x) => x.name).join(", ") ?? a.year,
-                to: "/album/$id" as const,
-              }))}
-            />
-          ) : <Empty label="No albums found." />
-        ) : activeTab === "artists" ? (
-          artists.length ? (
-            <CardGrid
-              items={artists.map((a) => ({
-                id: a.id,
-                name: a.name,
-                image: a.image,
-                to: "/artist/$id" as const,
-                round: true,
-              }))}
-            />
-          ) : <Empty label="No artists found." />
-        ) : (
-          playlists.length ? (
-            <CardGrid
-              items={playlists.map((p) => ({
-                id: p.id,
-                name: p.name,
-                image: p.image,
-                subtitle: p.songCount ? `${p.songCount} songs` : undefined,
-                to: "/playlist/$id" as const,
-              }))}
-            />
-          ) : <Empty label="No playlists found." />
-        )}
-      </section>
+      )}
     </div>
   );
-}
-
-function Empty({ label }: { label: string }) {
-  return <p className="rounded-xl border border-white/10 bg-white/5 p-8 text-center text-sm text-white/50">{label}</p>;
 }
