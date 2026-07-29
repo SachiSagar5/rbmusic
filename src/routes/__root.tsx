@@ -14,6 +14,7 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { PlayerProvider } from "@/lib/player";
 import { AppHeader } from "@/components/AppHeader";
 import { PlayerBar } from "@/components/PlayerBar";
+import { NowPlayingBackdrop } from "@/components/NowPlayingBackdrop";
 
 function NotFoundComponent() {
   return (
@@ -126,6 +127,7 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <PlayerProvider>
         <div className="relative min-h-screen overflow-hidden bg-[#07040f] text-white">
+          <NowPlayingBackdrop />
           {/* Liquid glass ambient background */}
           <div className="pointer-events-none fixed -top-40 -left-32 h-[620px] w-[620px] rounded-full bg-fuchsia-500/40 blur-[120px]" />
           <div className="pointer-events-none fixed top-40 right-0 h-[520px] w-[520px] rounded-full bg-indigo-500/35 blur-[110px]" />
