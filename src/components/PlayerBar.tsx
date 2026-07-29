@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { usePlayer } from "@/lib/player";
+import { EQ_BANDS, EQ_PRESETS } from "@/lib/player";
 import { decode, fmtTime, getLyrics, pickImg, type Lyrics } from "@/lib/saavn";
 
 export function PlayerBar() {
@@ -12,6 +13,7 @@ export function PlayerBar() {
     <>
       {p.showQueue && <QueueDrawer />}
       {p.showLyrics && <LyricsDrawer />}
+      {p.showEq && <EqDrawer />}
       <div className="fixed inset-x-0 bottom-0 z-30 border-t border-white/10 bg-[#0b0714]/90 pb-[env(safe-area-inset-bottom)] backdrop-blur-2xl">
         {/* Progress on very top for mobile */}
         <input
@@ -119,6 +121,11 @@ export function PlayerBar() {
                 <path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" strokeLinecap="round" />
               </svg>
             </ToggleIcon>
+            <ToggleIcon on={p.eqEnabled || p.showEq} title="Equalizer & Boost" onClick={() => p.setShowEq(!p.showEq)}>
+              <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M6 20V10M6 6V4M12 20v-6M12 10V4M18 20v-2M18 14V4M3 10h6M9 14h6M15 18h6" strokeLinecap="round" />
+              </svg>
+            </ToggleIcon>
             <div className="flex w-28 items-center gap-2">
               <svg viewBox="0 0 24 24" className="h-4 w-4 text-white/50"><path d="M3 10v4h4l5 5V5L7 10H3z" fill="currentColor"/></svg>
               <input type="range" min={0} max={1} step={0.01} value={p.volume} aria-label="Volume"
@@ -136,6 +143,11 @@ export function PlayerBar() {
             <ToggleIcon on={p.showQueue} title="Queue" onClick={() => p.setShowQueue(!p.showQueue)}>
               <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" strokeLinecap="round" />
+              </svg>
+            </ToggleIcon>
+            <ToggleIcon on={p.eqEnabled || p.showEq} title="Equalizer & Boost" onClick={() => p.setShowEq(!p.showEq)}>
+              <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M6 20V10M6 6V4M12 20v-6M12 10V4M18 20v-2M18 14V4M3 10h6M9 14h6M15 18h6" strokeLinecap="round" />
               </svg>
             </ToggleIcon>
           </div>
@@ -258,5 +270,110 @@ function Drawer({ title, children, onClose }: { title: string; children: React.R
         <div className="max-h-[60vh] overflow-y-auto">{children}</div>
       </aside>
     </>
+  );
+}
+
+function EqDrawer() {
+  const p = usePlayer();
+  return (
+    <Drawer title="Equalizer & Volume Boost" onClose={() => p.setShowEq(false)}>
+      <div className="space-y-5 p-4">
+        <div className="flex items-center justify-between gap-3 rounded-xl bg-white/5 p-3">
+          <div>
+            <p className="text-sm font-medium text-white">Enable audio processing</p>
+            <p className="text-xs text-white/50">Powers the equalizer and volume boost.</p>
+          </div>
+          <button
+            onClick={() => (p.eqEnabled ? p.disableEq() : p.enableEq())}
+            className={`h-7 w-12 rounded-full transition ${p.eqEnabled ? "bg-fuchsia-500" : "bg-white/15"}`}
+            aria-label="Toggle equalizer"
+          >
+            <span
+              className={`block h-6 w-6 translate-y-[2px] rounded-full bg-white transition ${
+                p.eqEnabled ? "translate-x-[22px]" : "translate-x-[2px]"
+              }`}
+            />
+          </button>
+        </div>
+
+        {p.eqError && (
+          <p className="rounded-lg bg-red-500/10 p-2 text-xs text-red-300">
+            {p.eqError}. Try a downloaded/offline track — some streams block cross-origin audio processing.
+          </p>
+        )}
+
+        <div>
+          <div className="mb-2 flex items-center justify-between">
+            <p className="text-xs font-semibold uppercase tracking-wide text-white/60">Volume boost</p>
+            <span className="text-xs tabular-nums text-white/70">{Math.round(p.boost * 100)}%</span>
+          </div>
+          <input
+            type="range"
+            min={1}
+            max={4}
+            step={0.05}
+            value={p.boost}
+            onChange={(e) => p.setBoost(+e.target.value)}
+            disabled={!p.eqEnabled}
+            className="h-1 w-full touch-none accent-fuchsia-400 disabled:opacity-40"
+            aria-label="Volume boost"
+          />
+          <div className="mt-1 flex justify-between text-[10px] text-white/40">
+            <span>100%</span>
+            <span>200%</span>
+            <span>400%</span>
+          </div>
+        </div>
+
+        <div>
+          <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-white/60">Presets</p>
+          <div className="flex flex-wrap gap-2">
+            {Object.keys(EQ_PRESETS).map((name) => (
+              <button
+                key={name}
+                onClick={() => p.applyEqPreset(name)}
+                disabled={!p.eqEnabled}
+                className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-white/80 transition hover:bg-white/10 disabled:opacity-40"
+              >
+                {name}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div>
+          <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-white/60">Equalizer</p>
+          <div className="flex items-end justify-between gap-3">
+            {EQ_BANDS.map((freq, i) => (
+              <div key={freq} className="flex flex-1 flex-col items-center gap-2">
+                <span className="text-[10px] tabular-nums text-white/60">
+                  {p.eqGains[i] > 0 ? "+" : ""}
+                  {p.eqGains[i].toFixed(0)}dB
+                </span>
+                <input
+                  type="range"
+                  min={-12}
+                  max={12}
+                  step={1}
+                  value={p.eqGains[i]}
+                  onChange={(e) => p.setEqBand(i, +e.target.value)}
+                  disabled={!p.eqEnabled}
+                  className="eq-slider h-32 touch-none accent-fuchsia-400 disabled:opacity-40"
+                  style={{ writingMode: "vertical-lr" as any, WebkitAppearance: "slider-vertical" as any }}
+                  aria-label={`${freq} Hz`}
+                />
+                <span className="text-[10px] text-white/50">
+                  {freq >= 1000 ? `${freq / 1000}k` : freq}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <p className="text-[10px] leading-relaxed text-white/40">
+          Volume boost above 100% may distort quiet mixes. Requires a browser with Web Audio support.
+        </p>
+      </div>
+    </Drawer>
   );
 }

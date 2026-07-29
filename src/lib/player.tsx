@@ -13,6 +13,15 @@ import { pickAudio, type SSong } from "./saavn";
 
 export type RepeatMode = "off" | "all" | "one";
 
+export const EQ_BANDS = [60, 250, 1000, 4000, 12000] as const;
+export const EQ_PRESETS: Record<string, number[]> = {
+  Flat: [0, 0, 0, 0, 0],
+  "Bass Boost": [8, 5, 0, 0, 0],
+  Vocal: [-2, 0, 3, 4, 1],
+  Treble: [0, 0, 0, 4, 7],
+  "Loudness+": [6, 2, 0, 2, 5],
+};
+
 type Ctx = {
   queue: SSong[];
   index: number;
@@ -25,6 +34,11 @@ type Ctx = {
   repeat: RepeatMode;
   showQueue: boolean;
   showLyrics: boolean;
+  showEq: boolean;
+  eqEnabled: boolean;
+  eqGains: number[];
+  boost: number;
+  eqError: string | null;
   playList: (list: SSong[], startIdx?: number) => void;
   playSong: (song: SSong) => void;
   toggle: () => void;
@@ -39,6 +53,12 @@ type Ctx = {
   jumpTo: (idx: number) => void;
   setShowQueue: (v: boolean) => void;
   setShowLyrics: (v: boolean) => void;
+  setShowEq: (v: boolean) => void;
+  enableEq: () => Promise<void>;
+  disableEq: () => void;
+  setEqBand: (i: number, gain: number) => void;
+  applyEqPreset: (name: string) => void;
+  setBoost: (v: number) => void;
 };
 
 const PlayerCtx = createContext<Ctx | null>(null);
@@ -61,6 +81,15 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   const [repeat, setRepeat] = useState<RepeatMode>("off");
   const [showQueue, setShowQueue] = useState(false);
   const [showLyrics, setShowLyrics] = useState(false);
+  const [showEq, setShowEq] = useState(false);
+  const [eqEnabled, setEqEnabled] = useState(false);
+  const [eqGains, setEqGains] = useState<number[]>([0, 0, 0, 0, 0]);
+  const [boost, setBoostState] = useState(1);
+  const [eqError, setEqError] = useState<string | null>(null);
+  const audioCtxRef = useRef<AudioContext | null>(null);
+  const srcNodeRef = useRef<MediaElementAudioSourceNode | null>(null);
+  const filtersRef = useRef<BiquadFilterNode[]>([]);
+  const gainNodeRef = useRef<GainNode | null>(null);
   const objectUrlRef = useRef<string | null>(null);
 
   const current = index >= 0 && index < queue.length ? queue[index] : null;
@@ -69,6 +98,93 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     if (!audioRef.current) return;
     audioRef.current.volume = volume;
   }, [volume]);
+
+  const enableEq = useCallback(async () => {
+    const a = audioRef.current;
+    if (!a) return;
+    setEqError(null);
+    try {
+      if (!audioCtxRef.current) {
+        const AC: typeof AudioContext =
+          (window as any).AudioContext || (window as any).webkitAudioContext;
+        if (!AC) throw new Error("Web Audio not supported");
+        // Ensure CORS so MediaElementSource isn't silenced for remote streams.
+        if (a.crossOrigin !== "anonymous") {
+          const t = a.currentTime;
+          const s = a.src;
+          a.crossOrigin = "anonymous";
+          if (s) {
+            a.src = s;
+            try {
+              await a.play();
+              a.currentTime = t;
+            } catch {}
+          }
+        }
+        const ctx = new AC();
+        const src = ctx.createMediaElementSource(a);
+        const filters = EQ_BANDS.map((freq, i) => {
+          const f = ctx.createBiquadFilter();
+          f.type = i === 0 ? "lowshelf" : i === EQ_BANDS.length - 1 ? "highshelf" : "peaking";
+          f.frequency.value = freq;
+          f.Q.value = 1;
+          f.gain.value = eqGains[i] ?? 0;
+          return f;
+        });
+        const gain = ctx.createGain();
+        gain.gain.value = boost;
+        // chain: src -> f0 -> f1 -> ... -> gain -> destination
+        let node: AudioNode = src;
+        for (const f of filters) {
+          node.connect(f);
+          node = f;
+        }
+        node.connect(gain);
+        gain.connect(ctx.destination);
+        audioCtxRef.current = ctx;
+        srcNodeRef.current = src;
+        filtersRef.current = filters;
+        gainNodeRef.current = gain;
+      }
+      await audioCtxRef.current.resume();
+      setEqEnabled(true);
+    } catch (e: any) {
+      setEqError(e?.message || "Failed to enable equalizer");
+      setEqEnabled(false);
+    }
+  }, [boost, eqGains]);
+
+  const disableEq = useCallback(() => {
+    // Flatten filters and reset gain so playback is unaffected while disabled.
+    filtersRef.current.forEach((f) => (f.gain.value = 0));
+    if (gainNodeRef.current) gainNodeRef.current.gain.value = 1;
+    setEqEnabled(false);
+  }, []);
+
+  const setEqBand = useCallback((i: number, gain: number) => {
+    setEqGains((g) => {
+      const n = [...g];
+      n[i] = gain;
+      return n;
+    });
+    const f = filtersRef.current[i];
+    if (f && eqEnabled) f.gain.value = gain;
+  }, [eqEnabled]);
+
+  const applyEqPreset = useCallback((name: string) => {
+    const preset = EQ_PRESETS[name];
+    if (!preset) return;
+    setEqGains(preset);
+    if (eqEnabled) {
+      filtersRef.current.forEach((f, i) => (f.gain.value = preset[i] ?? 0));
+    }
+  }, [eqEnabled]);
+
+  const setBoost = useCallback((v: number) => {
+    const clamped = Math.max(1, Math.min(4, v));
+    setBoostState(clamped);
+    if (gainNodeRef.current && eqEnabled) gainNodeRef.current.gain.value = clamped;
+  }, [eqEnabled]);
 
   const revokeObjectUrl = () => {
     if (objectUrlRef.current) {
@@ -244,6 +360,11 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       repeat,
       showQueue,
       showLyrics,
+      showEq,
+      eqEnabled,
+      eqGains,
+      boost,
+      eqError,
       playList,
       playSong,
       toggle,
@@ -258,8 +379,14 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       jumpTo,
       setShowQueue,
       setShowLyrics,
+      setShowEq,
+      enableEq,
+      disableEq,
+      setEqBand,
+      applyEqPreset,
+      setBoost,
     }),
-    [queue, index, current, playing, progress, duration, volume, shuffle, repeat, showQueue, showLyrics, playList, playSong, toggle, next, prev, seek, setVolume, toggleShuffle, cycleRepeat, addToQueue, removeFromQueue, jumpTo],
+    [queue, index, current, playing, progress, duration, volume, shuffle, repeat, showQueue, showLyrics, showEq, eqEnabled, eqGains, boost, eqError, playList, playSong, toggle, next, prev, seek, setVolume, toggleShuffle, cycleRepeat, addToQueue, removeFromQueue, jumpTo, enableEq, disableEq, setEqBand, applyEqPreset, setBoost],
   );
 
   return (
