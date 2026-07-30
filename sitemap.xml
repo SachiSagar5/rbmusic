@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://sachisagar5.github.io/rbmusic/</loc>
+    <priority>1.0</priority>
+    <changefreq>daily</changefreq>
+  </url>
+  <url>
+    <loc>https://sachisagar5.github.io/rbmusic/search</loc>
+    <priority>0.8</priority>
+    <changefreq>weekly</changefreq>
+  </url>
+  <url>
+    <loc>https://sachisagar5.github.io/rbmusic/library</loc>
+    <priority>0.6</priority>
+    <changefreq>weekly</changefreq>
+  </url>
+  <url>
+    <loc>https://sachisagar5.github.io/rbmusic/playlists</loc>
+    <priority>0.7</priority>
+    <changefreq>daily</changefreq>
+  </url>
+  <url>
+    <loc>https://sachisagar5.github.io/rbmusic/login</loc>
+    <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>https://sachisagar5.github.io/rbmusic/dashboard</loc>
+    <priority>0.3</priority>
+  </url>
+</urlset>
