@@ -163,6 +163,11 @@ export function PlayerBar() {
 
 function CastButton() {
   const p = usePlayer();
+  React.useEffect(() => {
+    if (!p.castError) return;
+    const t = setTimeout(() => p.setCastError(null), 7000);
+    return () => clearTimeout(t);
+  }, [p.castError]);
   return (
     <div className="relative">
       <ToggleIcon
@@ -176,9 +181,13 @@ function CastButton() {
         </svg>
       </ToggleIcon>
       {p.castError && (
-        <div className="absolute bottom-11 right-0 w-64 rounded-2xl glass-panel p-3 text-[11px] leading-snug text-white/80 shadow-xl">
+        <button
+          onClick={() => p.setCastError(null)}
+          className="absolute bottom-11 right-0 z-50 w-64 rounded-2xl glass-panel p-3 text-left text-[11px] leading-snug text-white/80 shadow-xl"
+        >
           {p.castError}
-        </div>
+          <span className="mt-1 block text-white/45">Tap to dismiss</span>
+        </button>
       )}
     </div>
   );
