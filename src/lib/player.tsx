@@ -36,6 +36,10 @@ type Ctx = {
   showLyrics: boolean;
   showEq: boolean;
   eqEnabled: boolean;
+  castAvailable: boolean;
+  casting: boolean;
+  castError: string | null;
+  openCastPicker: () => Promise<void>;
   eqGains: number[];
   boost: number;
   eqError: string | null;
@@ -83,6 +87,9 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   const [showLyrics, setShowLyrics] = useState(false);
   const [showEq, setShowEq] = useState(false);
   const [eqEnabled, setEqEnabled] = useState(false);
+  const [castAvailable, setCastAvailable] = useState(false);
+  const [casting, setCasting] = useState(false);
+  const [castError, setCastError] = useState<string | null>(null);
   const [eqGains, setEqGains] = useState<number[]>([0, 0, 0, 0, 0]);
   const [boost, setBoostState] = useState(1);
   const [eqError, setEqError] = useState<string | null>(null);
@@ -93,6 +100,69 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   const objectUrlRef = useRef<string | null>(null);
 
   const current = index >= 0 && index < queue.length ? queue[index] : null;
+
+  // --- Multi-device playback (AirPlay / Chromecast / Remote Playback API) ---
+  useEffect(() => {
+    const a = audioRef.current as any;
+    if (!a) return;
+    const cleanups: Array<() => void> = [];
+
+    // Safari / iOS / macOS: AirPlay target availability
+    if (typeof (a as any).webkitShowPlaybackTargetPicker === "function") {
+      const onAvail = (e: any) => setCastAvailable(e.availability === "available");
+      const onChange = (e: any) => setCasting(!!e.target.webkitCurrentPlaybackTargetIsWireless);
+      a.addEventListener("webkitplaybacktargetavailabilitychanged", onAvail);
+      a.addEventListener("webkitcurrentplaybacktargetiswirelesschanged", onChange);
+      cleanups.push(() => {
+        a.removeEventListener("webkitplaybacktargetavailabilitychanged", onAvail);
+        a.removeEventListener("webkitcurrentplaybacktargetiswirelesschanged", onChange);
+      });
+    }
+
+    // Chrome / Edge / Android: Remote Playback API (Cast, DLNA, smart TVs)
+    const remote = a.remote as any;
+    if (remote && typeof remote.watchAvailability === "function") {
+      let watchId: number | undefined;
+      remote
+        .watchAvailability((available: boolean) => setCastAvailable((v) => v || available))
+        .then((id: number) => (watchId = id))
+        .catch(() => {});
+      const onConnect = () => setCasting(true);
+      const onDisconnect = () => setCasting(false);
+      remote.addEventListener("connect", onConnect);
+      remote.addEventListener("connecting", onConnect);
+      remote.addEventListener("disconnect", onDisconnect);
+      cleanups.push(() => {
+        if (watchId !== undefined) remote.cancelWatchAvailability(watchId).catch(() => {});
+        remote.removeEventListener("connect", onConnect);
+        remote.removeEventListener("connecting", onConnect);
+        remote.removeEventListener("disconnect", onDisconnect);
+      });
+    }
+    return () => cleanups.forEach((f) => f());
+  }, []);
+
+  const openCastPicker = useCallback(async () => {
+    const a = audioRef.current as any;
+    if (!a) return;
+    setCastError(null);
+    try {
+      if (typeof a.webkitShowPlaybackTargetPicker === "function") {
+        a.webkitShowPlaybackTargetPicker();
+        return;
+      }
+      if (a.remote && typeof a.remote.prompt === "function") {
+        await a.remote.prompt();
+        return;
+      }
+      setCastError(
+        "This browser can't discover nearby devices. Use Chrome (Cast) or Safari (AirPlay), or cast the whole tab from the browser menu.",
+      );
+    } catch (e: any) {
+      if (e?.name !== "NotAllowedError" && e?.name !== "AbortError")
+        setCastError(e?.message || "No nearby devices found");
+    }
+  }, []);
 
   useEffect(() => {
     if (!audioRef.current) return;
@@ -365,6 +435,10 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       eqGains,
       boost,
       eqError,
+      castAvailable,
+      casting,
+      castError,
+      openCastPicker,
       playList,
       playSong,
       toggle,
@@ -386,7 +460,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       applyEqPreset,
       setBoost,
     }),
-    [queue, index, current, playing, progress, duration, volume, shuffle, repeat, showQueue, showLyrics, showEq, eqEnabled, eqGains, boost, eqError, playList, playSong, toggle, next, prev, seek, setVolume, toggleShuffle, cycleRepeat, addToQueue, removeFromQueue, jumpTo, enableEq, disableEq, setEqBand, applyEqPreset, setBoost],
+    [queue, index, current, playing, progress, duration, volume, shuffle, repeat, showQueue, showLyrics, showEq, eqEnabled, eqGains, boost, eqError, castAvailable, casting, castError, openCastPicker, playList, playSong, toggle, next, prev, seek, setVolume, toggleShuffle, cycleRepeat, addToQueue, removeFromQueue, jumpTo, enableEq, disableEq, setEqBand, applyEqPreset, setBoost],
   );
 
   return (
@@ -409,6 +483,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
         }}
         onPlay={() => setPlaying(true)}
         onPause={() => setPlaying(false)}
+        {...{ "x-webkit-airplay": "allow" }}
         preload="metadata"
       />
     </PlayerCtx.Provider>
