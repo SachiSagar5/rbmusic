@@ -128,6 +128,7 @@
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
+    touch-action: manipulation;
   }
 
   input[type="range"] {

@@ -83,7 +83,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   head: () => ({
     meta: [
       { charSet: "utf-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1" },
+      { name: "viewport", content: "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" },
       { title: "RB Music — Stream Music You Love" },
       { name: "description", content: "Search and stream millions of songs, albums, artists and playlists instantly with RB Music." },
       { property: "og:title", content: "RB Music — Stream Music You Love" },
@@ -131,7 +131,7 @@ const SIDEBAR_NAV = [
   { to: "/playlists", label: "Playlists", icon: "music" },
 ] as const;
 
-function Sidebar() {
+function Sidebar({ mobileOpen, onClose }: { mobileOpen?: boolean; onClose?: () => void }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   const icons: Record<string, ReactNode> = {
@@ -141,8 +141,8 @@ function Sidebar() {
     music: <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M9 18V5l12-2v13" strokeLinecap="round" strokeLinejoin="round"/><circle cx="6" cy="18" r="3" strokeLinecap="round" strokeLinejoin="round"/><circle cx="18" cy="16" r="3" strokeLinecap="round" strokeLinejoin="round"/></svg>,
   };
 
-  return (
-    <aside className="fixed left-0 top-0 z-30 hidden h-full w-60 flex-col border-r border-white/[3%] bg-[#06030e] lg:flex">
+  const inner = (
+    <>
       <div className="flex items-center gap-2.5 px-6 pt-6 pb-5">
         <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-fuchsia-500 via-purple-500 to-indigo-500 shadow-lg shadow-fuchsia-500/30 ring-1 ring-white/20">
           <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5 text-white">
@@ -165,6 +165,7 @@ function Sidebar() {
             <Link
               key={n.to}
               to={n.to}
+              onClick={onClose}
               className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 ${
                 active
                   ? "bg-gradient-to-r from-fuchsia-500/15 to-purple-500/10 text-white shadow-sm shadow-fuchsia-500/10"
@@ -182,6 +183,7 @@ function Sidebar() {
       <div className="border-t border-white/[3%] px-3 py-3">
         <Link
           to="/dashboard"
+          onClick={onClose}
           className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-white/50 transition hover:bg-white/5 hover:text-white/80"
         >
           <svg viewBox="0 0 24 24" className="h-5 w-5 text-white/40" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -191,13 +193,35 @@ function Sidebar() {
           Account
         </Link>
       </div>
-    </aside>
+    </>
+  );
+
+  return (
+    <>
+      <aside className="fixed left-0 top-0 z-30 hidden h-full w-60 flex-col border-r border-white/[3%] bg-[#06030e] lg:flex">
+        {inner}
+      </aside>
+      {mobileOpen && (
+        <>
+          <div className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden" onClick={onClose} />
+          <aside className="fixed left-0 top-0 z-50 flex h-full w-60 animate-in slide-in-from-left-4 flex-col border-r border-white/[3%] bg-[#06030e] lg:hidden">
+            <div className="flex justify-end px-4 pt-4 pb-0">
+              <button onClick={onClose} className="grid h-8 w-8 place-items-center rounded-lg text-white/50 hover:bg-white/10 hover:text-white transition" aria-label="Close menu">
+                <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M6 6l12 12M18 6 6 18" strokeLinecap="round" />
+                </svg>
+              </button>
+            </div>
+            {inner}
+          </aside>
+        </>
+      )}
+    </>
   );
 }
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
-  const pathname = useRouterState({ select: (s) => s.location.pathname });
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
@@ -213,7 +237,7 @@ function RootComponent() {
               <div className="pointer-events-none fixed -bottom-20 right-1/4 h-[420px] w-[420px] rounded-full bg-pink-500/20 blur-[100px] animate-pulse" style={{ animationDuration: "9s" }} />
 
               <div className="relative z-10 flex">
-                <Sidebar />
+                <Sidebar mobileOpen={mobileOpen} onClose={() => setMobileOpen(false)} />
 
                 <div className="flex min-w-0 flex-1 flex-col lg:ml-60">
                   <AppHeader onMenuToggle={() => setMobileOpen(!mobileOpen)} />
