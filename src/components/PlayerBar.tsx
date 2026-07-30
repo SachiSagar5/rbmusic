@@ -16,7 +16,7 @@ export function PlayerBar() {
       {p.showLyrics && <LyricsDrawer />}
       {p.showEq && <EqDrawer />}
       {c && <div className="fixed inset-x-0 bottom-0 z-30 pb-[env(safe-area-inset-bottom)] animate-in slide-in-from-bottom-4 fade-in duration-300">
-        <div className="mx-2 mb-2 rounded-[1.25rem] bg-[#0d0a1a]/95 backdrop-blur-2xl ring-1 ring-white/[8%] shadow-2xl shadow-black/60">
+        <div className="mx-2 mb-2 rounded-[1.25rem] bg-[#0d0a1a]/95 backdrop-blur-2xl ring-1 ring-white/[8%] shadow-2xl shadow-black/60 sm:mx-auto sm:w-1/2">
           <div className="px-3 pt-1 sm:px-5">
             <input
               type="range"
@@ -139,11 +139,11 @@ export function PlayerBar() {
                 </svg>
               </ToggleIcon>
               <div className="mx-1 h-5 w-px bg-white/10" />
-              <div className="flex w-24 items-center gap-2">
-                <svg viewBox="0 0 24 24" className="h-3.5 w-3.5 text-white/40" fill="currentColor"><path d="M3 10v4h4l5 5V5L7 10H3z"/></svg>
+              <div className="flex w-16 items-center gap-1.5 lg:w-20">
+                <svg viewBox="0 0 24 24" className="h-3.5 w-3.5 shrink-0 text-white/40" fill="currentColor"><path d="M3 10v4h4l5 5V5L7 10H3z"/></svg>
                 <input type="range" min={0} max={1} step={0.01} value={p.volume} aria-label="Volume"
                   onChange={(e) => p.setVolume(+e.target.value)}
-                  className="h-1 flex-1 touch-none" />
+                  className="h-1 flex-1 touch-none min-w-0" />
               </div>
             </div>
 

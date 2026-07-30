@@ -150,9 +150,9 @@ function Hero({ songs, loading }: { songs: SSong[]; loading: boolean }) {
 
   return (
     <section
-      className="relative overflow-hidden p-8 sm:p-10 lg:p-12"
+      className="group relative overflow-hidden px-5 py-6 sm:px-8 sm:py-7"
       style={{
-        borderRadius: 28,
+        borderRadius: 24,
         background: `
           radial-gradient(circle at 30% 48%, rgba(93, 43, 177, 0.20), transparent 38%),
           radial-gradient(circle at 58% 42%, rgba(156, 68, 255, 0.28), transparent 13%),
@@ -162,7 +162,7 @@ function Hero({ songs, loading }: { songs: SSong[]; loading: boolean }) {
         `,
         border: "1px solid rgba(122, 91, 190, 0.18)",
         boxShadow: "0 18px 55px rgba(0,0,0,0.48), 0 2px 0 rgba(122,70,210,0.15)",
-        minHeight: 620,
+        minHeight: 320,
       }}
     >
       {/* Nav arrows */}
@@ -170,10 +170,10 @@ function Hero({ songs, loading }: { songs: SSong[]; loading: boolean }) {
         <>
           <button
             onClick={prev}
-            className="absolute left-4 top-1/2 z-10 hidden -translate-y-1/2 rounded-full sm:grid place-items-center transition hover:brightness-125 hover:shadow-lg hover:shadow-purple-500/20"
+            className="absolute left-2 top-1/2 z-10 hidden -translate-y-1/2 rounded-full sm:grid place-items-center opacity-0 transition-all duration-300 group-hover:opacity-100 hover:brightness-125 hover:shadow-lg hover:shadow-purple-500/20"
             style={{
-              width: 66,
-              height: 66,
+              width: 40,
+              height: 40,
               background: "rgba(42, 38, 67, 0.72)",
               backdropFilter: "blur(14px)",
               border: "1px solid rgba(255,255,255,0.05)",
@@ -181,16 +181,16 @@ function Hero({ songs, loading }: { songs: SSong[]; loading: boolean }) {
             }}
             aria-label="Previous"
           >
-            <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="#E4DFF0" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="#E4DFF0" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M15 18l-6-6 6-6" />
             </svg>
           </button>
           <button
             onClick={next}
-            className="absolute right-4 top-1/2 z-10 hidden -translate-y-1/2 rounded-full sm:grid place-items-center transition hover:brightness-125 hover:shadow-lg hover:shadow-purple-500/20"
+            className="absolute right-2 top-1/2 z-10 hidden -translate-y-1/2 rounded-full sm:grid place-items-center opacity-0 transition-all duration-300 group-hover:opacity-100 hover:brightness-125 hover:shadow-lg hover:shadow-purple-500/20"
             style={{
-              width: 66,
-              height: 66,
+              width: 40,
+              height: 40,
               background: "rgba(42, 38, 67, 0.72)",
               backdropFilter: "blur(14px)",
               border: "1px solid rgba(255,255,255,0.05)",
@@ -198,7 +198,7 @@ function Hero({ songs, loading }: { songs: SSong[]; loading: boolean }) {
             }}
             aria-label="Next"
           >
-            <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="#E4DFF0" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="#E4DFF0" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M9 18l6-6-6-6" />
             </svg>
           </button>
@@ -207,15 +207,15 @@ function Hero({ songs, loading }: { songs: SSong[]; loading: boolean }) {
 
       <div className="relative flex flex-col gap-10 sm:flex-row sm:items-center sm:justify-between" style={{ paddingLeft: 0 }}>
         {/* -------- Left content -------- */}
-        <div className="min-w-0 max-w-lg">
-          <div className="flex items-center gap-3">
+        <div className="min-w-0 max-w-md">
+          <div className="flex items-center gap-2.5">
             <span
-              className="inline-flex items-center gap-1.5 rounded-full px-4 py-1 text-sm font-bold uppercase tracking-wider"
+              className="inline-flex items-center gap-1.5 rounded-full px-3 py-0.5 text-[11px] font-bold uppercase tracking-wider"
               style={{
                 background: "rgba(112, 39, 142, 0.38)",
                 border: "1px solid rgba(194, 99, 255, 0.12)",
                 color: "#D9A7FF",
-                letterSpacing: "2px",
+                letterSpacing: "1.5px",
                 boxShadow: "inset 0 0 12px rgba(194, 99, 255, 0.08)",
               }}
             >
@@ -223,17 +223,17 @@ function Hero({ songs, loading }: { songs: SSong[]; loading: boolean }) {
               Featured Today
             </span>
             {items.length > 1 && (
-              <span className="text-xs font-medium tracking-wide" style={{ color: "rgba(168, 125, 180, 0.42)" }}>
+              <span className="text-[10px] font-medium tracking-wide" style={{ color: "rgba(168, 125, 180, 0.42)" }}>
                 {String(slide + 1).padStart(2, "0")} / {String(items.length).padStart(2, "0")}
               </span>
             )}
           </div>
 
           <h1
-            className="mt-5 font-extrabold leading-none tracking-tight"
+            className="mt-3 font-extrabold leading-none tracking-tight"
             style={{
-              fontSize: "clamp(2.5rem, 5vw, 4.5rem)",
-              letterSpacing: "-2px",
+              fontSize: "clamp(1.5rem, 3.5vw, 2.5rem)",
+              letterSpacing: "-1px",
               textShadow: "0 4px 18px rgba(0,0,0,0.25)",
             }}
           >
@@ -263,7 +263,7 @@ function Hero({ songs, loading }: { songs: SSong[]; loading: boolean }) {
           </h1>
 
           {feature && (
-            <p className="mt-4 flex flex-wrap items-center gap-x-2" style={{ color: "#B9B6CC", fontSize: "clamp(0.95rem, 1.3vw, 1.3rem)", fontWeight: 600 }}>
+            <p className="mt-2 flex flex-wrap items-center gap-x-2 text-sm" style={{ color: "#B9B6CC", fontWeight: 500 }}>
               {feature.album?.name && <span className="font-medium" style={{ color: "#C8C4DC" }}>{decode(feature.album.name)}</span>}
               {feature.artists?.primary?.length ? (
                 <span className="flex items-center gap-1">
@@ -281,48 +281,48 @@ function Hero({ songs, loading }: { songs: SSong[]; loading: boolean }) {
             </p>
           )}
           {!feature && !loading && (
-            <p className="mt-3 max-w-xl" style={{ color: "#8F8CA5", fontSize: "clamp(0.95rem, 1.2vw, 1.2rem)", fontWeight: 500, lineHeight: 1.6 }}>
+            <p className="mt-2 max-w-lg text-sm" style={{ color: "#8F8CA5", fontWeight: 500 }}>
               Search any artist, album or track. RB Music streams instantly — no signup, no ads.
             </p>
           )}
 
           {feature && feature.album?.name && (
-            <p className="mt-2" style={{ color: "#8F8CA5", fontSize: "clamp(0.9rem, 1.1vw, 1.1rem)", fontWeight: 500, lineHeight: 1.6 }}>
+            <p className="mt-1 text-xs" style={{ color: "#8F8CA5", fontWeight: 500 }}>
               The song everyone is vibing to right now.
             </p>
           )}
 
-          <div className="mt-8 flex flex-wrap gap-4">
+          <div className="mt-5 flex flex-wrap gap-3">
             <button
               disabled={!songs.length}
               onClick={() => player.playList(songs, 0)}
               style={{
-                height: 82,
-                padding: "0 44px",
+                height: 48,
+                padding: "0 28px",
                 borderRadius: 9999,
                 background: "linear-gradient(135deg, #D83AE8 0%, #A82CFF 48%, #6D35F2 100%)",
-                boxShadow: "0 10px 30px rgba(184, 49, 242, 0.42), inset 0 1px 1px rgba(255,255,255,0.25)",
+                boxShadow: "0 8px 24px rgba(184, 49, 242, 0.35), inset 0 1px 1px rgba(255,255,255,0.25)",
                 border: "1px solid rgba(255,255,255,0.14)",
                 color: "#fff",
-                fontSize: "clamp(1rem, 1.3vw, 1.3rem)",
+                fontSize: "0.9rem",
                 fontWeight: 700,
                 cursor: songs.length ? "pointer" : "not-allowed",
                 opacity: songs.length ? 1 : 0.4,
                 transition: "all 0.25s ease",
               }}
-              className="inline-flex items-center gap-3"
+              className="inline-flex items-center gap-2"
               onMouseEnter={(e) => {
                 if (songs.length) {
-                  e.currentTarget.style.transform = "translateY(-3px) scale(1.02)";
-                  e.currentTarget.style.boxShadow = "0 14px 35px rgba(184, 49, 242, 0.55), inset 0 1px 1px rgba(255,255,255,0.25)";
+                  e.currentTarget.style.transform = "translateY(-2px) scale(1.02)";
+                  e.currentTarget.style.boxShadow = "0 12px 30px rgba(184, 49, 242, 0.5), inset 0 1px 1px rgba(255,255,255,0.25)";
                 }
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.transform = "none";
-                e.currentTarget.style.boxShadow = "0 10px 30px rgba(184, 49, 242, 0.42), inset 0 1px 1px rgba(255,255,255,0.25)";
+                e.currentTarget.style.boxShadow = "0 8px 24px rgba(184, 49, 242, 0.35), inset 0 1px 1px rgba(255,255,255,0.25)";
               }}
             >
-              <svg viewBox="0 0 24 24" className="h-5 w-5" fill="currentColor"><path d="M8 5v14l11-7z" /></svg>
+              <svg viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor"><path d="M8 5v14l11-7z" /></svg>
               Play Now
             </button>
             <button
@@ -332,26 +332,26 @@ function Hero({ songs, loading }: { songs: SSong[]; loading: boolean }) {
                 player.playList(shuffled, 0);
               }}
               style={{
-                height: 82,
-                padding: "0 44px",
+                height: 48,
+                padding: "0 28px",
                 borderRadius: 9999,
                 background: "rgba(38, 36, 64, 0.82)",
                 backdropFilter: "blur(16px)",
                 WebkitBackdropFilter: "blur(16px)",
                 border: "1px solid rgba(255,255,255,0.06)",
                 color: "#E0DDEA",
-                fontSize: "clamp(1rem, 1.3vw, 1.3rem)",
-                fontWeight: 650,
+                fontSize: "0.9rem",
+                fontWeight: 600,
                 boxShadow: "0 8px 22px rgba(0,0,0,0.22)",
                 cursor: songs.length ? "pointer" : "not-allowed",
                 opacity: songs.length ? 1 : 0.4,
                 transition: "all 0.25s ease",
               }}
-              className="inline-flex items-center gap-3"
+              className="inline-flex items-center gap-2"
               onMouseEnter={(e) => {
                 if (songs.length) {
                   e.currentTarget.style.background = "rgba(65, 53, 95, 0.92)";
-                  e.currentTarget.style.transform = "translateY(-2px)";
+                  e.currentTarget.style.transform = "translateY(-1px)";
                 }
               }}
               onMouseLeave={(e) => {
@@ -359,7 +359,7 @@ function Hero({ songs, loading }: { songs: SSong[]; loading: boolean }) {
                 e.currentTarget.style.transform = "none";
               }}
             >
-              <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
+              <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M16 3h5v5M4 20l16-16M21 16v5h-5M4 4l5 5m6 6 6 6" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
               Shuffle
@@ -373,9 +373,9 @@ function Hero({ songs, loading }: { songs: SSong[]; loading: boolean }) {
             <div
               className="relative"
               style={{
-                width: "clamp(280px, 28vw, 520px)",
+                width: "clamp(160px, 18vw, 240px)",
                 aspectRatio: "1 / 1",
-                borderRadius: 26,
+                borderRadius: 20,
                 overflow: "hidden",
                 boxShadow: "0 22px 55px rgba(0,0,0,0.42), 0 0 55px rgba(219, 46, 185, 0.16)",
                 border: "1px solid rgba(255,255,255,0.12)",
@@ -396,10 +396,10 @@ function Hero({ songs, loading }: { songs: SSong[]; loading: boolean }) {
               {/* Circular play button at lower-right */}
               <button
                 onClick={() => player.playList(songs, slide)}
-                className="absolute bottom-4 right-4 grid place-items-center transition hover:scale-105 active:scale-95"
+                className="absolute bottom-3 right-3 grid place-items-center transition hover:scale-105 active:scale-95"
                 style={{
-                  width: 76,
-                  height: 76,
+                  width: 44,
+                  height: 44,
                   borderRadius: "50%",
                   background: "rgba(255,255,255,0.94)",
                   boxShadow: "0 10px 28px rgba(0,0,0,0.28)",
@@ -407,21 +407,21 @@ function Hero({ songs, loading }: { songs: SSong[]; loading: boolean }) {
                 }}
                 aria-label="Play"
               >
-                <svg viewBox="0 0 24 24" className="ml-1 h-7 w-7" fill="currentColor"><path d="M8 5v14l11-7z" /></svg>
+                <svg viewBox="0 0 24 24" className="ml-0.5 h-5 w-5" fill="currentColor"><path d="M8 5v14l11-7z" /></svg>
               </button>
             </div>
 
             {/* Carousel indicators */}
             {items.length > 1 && (
-              <div className="mt-6 flex items-center gap-2.5">
+              <div className="mt-3 flex items-center gap-2">
                 {items.slice(0, Math.min(items.length, 5)).map((_, i) => (
                   <button
                     key={i}
                     onClick={() => setSlide(i)}
                     className="rounded-full transition-all duration-300"
                     style={{
-                      width: i === slide ? 46 : 11,
-                      height: 11,
+                      width: i === slide ? 28 : 8,
+                      height: 8,
                       background: i === slide
                         ? "linear-gradient(90deg, #A536E8, #E142B8)"
                         : "rgba(168, 125, 180, 0.42)",

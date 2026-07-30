@@ -131,7 +131,7 @@ const SIDEBAR_NAV = [
   { to: "/playlists", label: "Playlists", icon: "music" },
 ] as const;
 
-function Sidebar({ mobileOpen, onClose }: { mobileOpen?: boolean; onClose?: () => void }) {
+function Sidebar({ mobileOpen, onClose, sidebarOpen, onToggle }: { mobileOpen?: boolean; onClose?: () => void; sidebarOpen?: boolean; onToggle?: () => void }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   const icons: Record<string, ReactNode> = {
@@ -141,56 +141,78 @@ function Sidebar({ mobileOpen, onClose }: { mobileOpen?: boolean; onClose?: () =
     music: <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M9 18V5l12-2v13" strokeLinecap="round" strokeLinejoin="round"/><circle cx="6" cy="18" r="3" strokeLinecap="round" strokeLinejoin="round"/><circle cx="18" cy="16" r="3" strokeLinecap="round" strokeLinejoin="round"/></svg>,
   };
 
-  const inner = (
+  const expanded = sidebarOpen;
+
+  const linkClass = (active: boolean) =>
+    `flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 ${
+      active
+        ? "bg-gradient-to-r from-fuchsia-500/15 to-purple-500/10 text-white shadow-sm shadow-fuchsia-500/10"
+        : "text-white/50 hover:bg-white/5 hover:text-white/80"
+    }`;
+
+  const desktopInner = (
     <>
-      <div className="flex items-center gap-2.5 px-6 pt-6 pb-5">
-        <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-fuchsia-500 via-purple-500 to-indigo-500 shadow-lg shadow-fuchsia-500/30 ring-1 ring-white/20">
-          <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5 text-white">
-            <path d="M9 18V6l10-2v12" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-            <circle cx="6" cy="18" r="3" stroke="currentColor" strokeWidth="1.8" />
-            <circle cx="16" cy="16" r="3" stroke="currentColor" strokeWidth="1.8" />
-          </svg>
-        </div>
-        <div>
-          <span className="block text-base font-bold tracking-tight text-white">RB Music</span>
-          <span className="block text-[10px] font-medium tracking-wide text-fuchsia-400/70 uppercase">Stream Unlimited</span>
-        </div>
+      {/* Toggle button */}
+      <div className="flex items-center justify-center px-3 pt-4 pb-3">
+        {expanded ? (
+          <div className="flex w-full items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-fuchsia-500 via-purple-500 to-indigo-500 shadow-lg shadow-fuchsia-500/30 ring-1 ring-white/20">
+                <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5 text-white">
+                  <path d="M9 18V6l10-2v12" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                  <circle cx="6" cy="18" r="3" stroke="currentColor" strokeWidth="1.8" />
+                  <circle cx="16" cy="16" r="3" stroke="currentColor" strokeWidth="1.8" />
+                </svg>
+              </div>
+              <div>
+                <span className="block text-sm font-bold tracking-tight text-white">RB Music</span>
+                <span className="block text-[9px] font-medium tracking-wide text-fuchsia-400/70 uppercase">Stream Unlimited</span>
+              </div>
+            </div>
+            <button onClick={onToggle} className="grid h-8 w-8 place-items-center rounded-lg text-white/40 hover:bg-white/10 hover:text-white transition" aria-label="Collapse sidebar">
+              <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2"><path d="M15 18l-6-6 6-6" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            </button>
+          </div>
+        ) : (
+          <button onClick={onToggle} className="grid h-9 w-9 place-items-center rounded-xl text-white/40 hover:bg-white/10 hover:text-white transition" aria-label="Expand sidebar">
+            <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 6h16M4 12h16M4 18h16" strokeLinecap="round"/></svg>
+          </button>
+        )}
       </div>
 
-      <nav className="flex-1 px-3 py-2">
-        <p className="mb-2 px-3 text-[10px] font-semibold uppercase tracking-[0.15em] text-white/30">Menu</p>
+      <nav className="flex-1 px-2 py-2">
         {SIDEBAR_NAV.map((n) => {
           const active = n.to === "/" ? pathname === "/" : pathname.startsWith(n.to);
           return (
             <Link
               key={n.to}
               to={n.to}
-              onClick={onClose}
-              className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 ${
-                active
-                  ? "bg-gradient-to-r from-fuchsia-500/15 to-purple-500/10 text-white shadow-sm shadow-fuchsia-500/10"
-                  : "text-white/50 hover:bg-white/5 hover:text-white/80"
-              }`}
+              className={`flex items-center rounded-xl py-2.5 text-sm font-medium transition-all duration-200 ${
+                expanded ? "gap-3 px-3 justify-start" : "justify-center gap-0 px-0"
+              } ${active ? "bg-gradient-to-r from-fuchsia-500/15 to-purple-500/10 text-white shadow-sm shadow-fuchsia-500/10" : "text-white/50 hover:bg-white/5 hover:text-white/80"}`}
+              title={expanded ? undefined : n.label}
             >
               <span className={`${active ? "text-fuchsia-400" : "text-white/40"}`}>{icons[n.icon]}</span>
-              {n.label}
-              {active && <span className="ml-auto h-1.5 w-1.5 rounded-full bg-fuchsia-400" />}
+              {expanded && <span className="ml-0">{n.label}</span>}
+              {expanded && active && <span className="ml-auto h-1.5 w-1.5 rounded-full bg-fuchsia-400" />}
             </Link>
           );
         })}
       </nav>
 
-      <div className="border-t border-white/[3%] px-3 py-3">
+      <div className="border-t border-white/[3%] px-2 py-3">
         <Link
           to="/dashboard"
-          onClick={onClose}
-          className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-white/50 transition hover:bg-white/5 hover:text-white/80"
+          className={`flex items-center rounded-xl py-2.5 text-sm font-medium text-white/50 transition hover:bg-white/5 hover:text-white/80 ${
+            expanded ? "gap-3 px-3 justify-start" : "justify-center gap-0 px-0"
+          }`}
+          title={expanded ? undefined : "Account"}
         >
           <svg viewBox="0 0 24 24" className="h-5 w-5 text-white/40" fill="none" stroke="currentColor" strokeWidth="1.5">
             <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" strokeLinecap="round" strokeLinejoin="round" />
             <circle cx="12" cy="7" r="4" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
-          Account
+          {expanded && <span>Account</span>}
         </Link>
       </div>
     </>
@@ -198,9 +220,16 @@ function Sidebar({ mobileOpen, onClose }: { mobileOpen?: boolean; onClose?: () =
 
   return (
     <>
-      <aside className="fixed left-0 top-0 z-30 hidden h-full w-60 flex-col border-r border-white/[3%] bg-[#06030e] lg:flex">
-        {inner}
+      {/* Desktop sidebar: collapsed vs expanded */}
+      <aside
+        className={`fixed left-0 top-0 z-30 hidden h-full flex-col border-r border-white/[3%] bg-[#06030e] transition-all duration-300 lg:flex ${
+          expanded ? "w-60" : "w-16"
+        }`}
+      >
+        {desktopInner}
       </aside>
+
+      {/* Mobile overlay drawer */}
       {mobileOpen && (
         <>
           <div className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden" onClick={onClose} />
@@ -212,7 +241,54 @@ function Sidebar({ mobileOpen, onClose }: { mobileOpen?: boolean; onClose?: () =
                 </svg>
               </button>
             </div>
-            {inner}
+            <div className="flex items-center gap-2.5 px-6 pt-2 pb-5">
+              <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-fuchsia-500 via-purple-500 to-indigo-500 shadow-lg shadow-fuchsia-500/30 ring-1 ring-white/20">
+                <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5 text-white">
+                  <path d="M9 18V6l10-2v12" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                  <circle cx="6" cy="18" r="3" stroke="currentColor" strokeWidth="1.8" />
+                  <circle cx="16" cy="16" r="3" stroke="currentColor" strokeWidth="1.8" />
+                </svg>
+              </div>
+              <div>
+                <span className="block text-base font-bold tracking-tight text-white">RB Music</span>
+                <span className="block text-[10px] font-medium tracking-wide text-fuchsia-400/70 uppercase">Stream Unlimited</span>
+              </div>
+            </div>
+            <nav className="flex-1 px-3 py-2">
+              <p className="mb-2 px-3 text-[10px] font-semibold uppercase tracking-[0.15em] text-white/30">Menu</p>
+              {SIDEBAR_NAV.map((n) => {
+                const active = n.to === "/" ? pathname === "/" : pathname.startsWith(n.to);
+                return (
+                  <Link
+                    key={n.to}
+                    to={n.to}
+                    onClick={onClose}
+                    className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 ${
+                      active
+                        ? "bg-gradient-to-r from-fuchsia-500/15 to-purple-500/10 text-white shadow-sm shadow-fuchsia-500/10"
+                        : "text-white/50 hover:bg-white/5 hover:text-white/80"
+                    }`}
+                  >
+                    <span className={`${active ? "text-fuchsia-400" : "text-white/40"}`}>{icons[n.icon]}</span>
+                    {n.label}
+                    {active && <span className="ml-auto h-1.5 w-1.5 rounded-full bg-fuchsia-400" />}
+                  </Link>
+                );
+              })}
+            </nav>
+            <div className="border-t border-white/[3%] px-3 py-3">
+              <Link
+                to="/dashboard"
+                onClick={onClose}
+                className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-white/50 transition hover:bg-white/5 hover:text-white/80"
+              >
+                <svg viewBox="0 0 24 24" className="h-5 w-5 text-white/40" fill="none" stroke="currentColor" strokeWidth="1.5">
+                  <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" strokeLinecap="round" strokeLinejoin="round" />
+                  <circle cx="12" cy="7" r="4" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+                Account
+              </Link>
+            </div>
           </aside>
         </>
       )}
@@ -223,6 +299,7 @@ function Sidebar({ mobileOpen, onClose }: { mobileOpen?: boolean; onClose?: () =
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -237,9 +314,9 @@ function RootComponent() {
               <div className="pointer-events-none fixed -bottom-20 right-1/4 h-[420px] w-[420px] rounded-full bg-pink-500/20 blur-[100px] animate-pulse" style={{ animationDuration: "9s" }} />
 
               <div className="relative z-10 flex">
-                <Sidebar mobileOpen={mobileOpen} onClose={() => setMobileOpen(false)} />
+                <Sidebar mobileOpen={mobileOpen} onClose={() => setMobileOpen(false)} sidebarOpen={sidebarOpen} onToggle={() => setSidebarOpen((v) => !v)} />
 
-                <div className="flex min-w-0 flex-1 flex-col lg:ml-60">
+                <div className={`flex min-w-0 flex-1 flex-col transition-all duration-300 ${sidebarOpen ? "lg:ml-60" : "lg:ml-16"}`}>
                   <AppHeader onMenuToggle={() => setMobileOpen(!mobileOpen)} />
 
                   <main className="flex-1 px-4 pb-48 pt-4 sm:px-6 sm:pb-40 lg:px-8 xl:px-10">
