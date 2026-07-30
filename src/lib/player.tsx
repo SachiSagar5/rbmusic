@@ -483,7 +483,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
         }}
         onPlay={() => setPlaying(true)}
         onPause={() => setPlaying(false)}
-        x-webkit-airplay="allow"
+        {...{ "x-webkit-airplay": "allow" }}
         preload="metadata"
       />
     </PlayerCtx.Provider>
