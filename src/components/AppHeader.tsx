@@ -7,7 +7,7 @@ const NAV = [
   { to: "/library", label: "Library" },
 ] as const;
 
-export function AppHeader() {
+export function AppHeader({ onMenuToggle }: { onMenuToggle?: () => void }) {
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const search = useRouterState({ select: (s) => (s.location.search as { q?: string })?.q ?? "" });
@@ -23,41 +23,57 @@ export function AppHeader() {
   };
 
   return (
-    <header className="sticky top-0 z-30">
-      <div className="mx-3 mt-3 flex max-w-7xl items-center gap-3 rounded-3xl px-4 py-3 glass sm:mx-auto sm:gap-4 sm:px-6">
-        <Link to="/" className="flex min-w-0 items-center gap-2">
-          <div className="grid h-9 w-9 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-fuchsia-400 via-pink-500 to-indigo-500 shadow-lg shadow-fuchsia-500/40 ring-1 ring-white/40">
-            <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4 text-white">
-              <path d="M9 18V6l10-2v12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-              <circle cx="6" cy="18" r="3" stroke="currentColor" strokeWidth="2" />
-              <circle cx="16" cy="16" r="3" stroke="currentColor" strokeWidth="2" />
+    <header className="sticky top-0 z-20">
+      <div className="flex items-center gap-3 px-4 py-3 sm:px-6 lg:px-8 xl:px-10">
+        {/* Mobile logo + hamburger */}
+        <div className="flex items-center gap-2 lg:hidden">
+          <button
+            onClick={onMenuToggle}
+            className="grid h-9 w-9 place-items-center rounded-xl text-white/60 hover:bg-white/10 hover:text-white transition"
+            aria-label="Menu"
+          >
+            <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M4 6h16M4 12h16M4 18h16" strokeLinecap="round" />
             </svg>
-          </div>
-          <span className="truncate text-lg font-bold tracking-tight text-white">RB Music</span>
-        </Link>
+          </button>
+          <Link to="/" className="flex items-center gap-2">
+            <div className="grid h-8 w-8 place-items-center rounded-lg bg-gradient-to-br from-fuchsia-500 via-purple-500 to-indigo-500 shadow-lg shadow-fuchsia-500/30 ring-1 ring-white/20">
+              <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4 text-white">
+                <path d="M9 18V6l10-2v12" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                <circle cx="6" cy="18" r="3" stroke="currentColor" strokeWidth="1.8" />
+                <circle cx="16" cy="16" r="3" stroke="currentColor" strokeWidth="1.8" />
+              </svg>
+            </div>
+            <span className="text-base font-bold tracking-tight text-white">RB Music</span>
+          </Link>
+        </div>
 
-        <form onSubmit={submit} className="ml-auto flex min-w-0 flex-1 max-w-md items-center gap-2 rounded-full px-3 sm:ml-4 glass-chip">
-          <svg viewBox="0 0 24 24" fill="none" className="ml-1 h-4 w-4 shrink-0 text-white/50">
+        {/* Search bar */}
+        <form onSubmit={submit} className="relative ml-auto flex flex-1 items-center max-w-md lg:mx-auto lg:max-w-lg">
+          <svg viewBox="0 0 24 24" fill="none" className="pointer-events-none absolute left-3 h-4 w-4 text-white/40">
             <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="2" />
             <path d="m20 20-3-3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
           </svg>
           <input
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            placeholder="Search…"
-            className="min-w-0 flex-1 bg-transparent py-2 text-sm text-white outline-none placeholder:text-white/40"
+            placeholder="What do you want to listen to?"
+            className="h-10 w-full rounded-2xl bg-white/[6%] pl-10 pr-4 text-sm text-white outline-none ring-1 ring-white/[6%] transition placeholder:text-white/30 focus:bg-white/[8%] focus:ring-fuchsia-500/40"
           />
         </form>
 
-        <nav className="hidden items-center gap-1 sm:flex">
+        {/* Desktop nav */}
+        <nav className="hidden items-center gap-1 lg:flex">
           {NAV.map((n) => {
             const active = n.to === "/" ? pathname === "/" : pathname.startsWith(n.to);
             return (
               <Link
                 key={n.to}
                 to={n.to}
-                className={`rounded-full px-3 py-1.5 text-sm font-medium transition ${
-                  active ? "glass-chip text-white" : "text-white/60 hover:text-white"
+                className={`rounded-xl px-3.5 py-1.5 text-sm font-medium transition-all ${
+                  active
+                    ? "bg-white/10 text-white shadow-sm"
+                    : "text-white/50 hover:bg-white/5 hover:text-white/80"
                 }`}
               >
                 {n.label}
@@ -65,18 +81,40 @@ export function AppHeader() {
             );
           })}
         </nav>
+
+        {/* Actions */}
+        <div className="flex items-center gap-2">
+          <button
+            className="grid h-9 w-9 place-items-center rounded-xl text-white/40 transition hover:bg-white/10 hover:text-white/80"
+            aria-label="Notifications"
+          >
+            <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9" strokeLinecap="round" strokeLinejoin="round" />
+              <path d="M13.73 21a2 2 0 01-3.46 0" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </button>
+          <Link
+            to="/dashboard"
+            className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-fuchsia-500 to-purple-600 text-white ring-1 ring-white/20 transition hover:shadow-lg hover:shadow-fuchsia-500/30 active:scale-95"
+            aria-label="Profile"
+          >
+            <svg viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor">
+              <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+            </svg>
+          </Link>
+        </div>
       </div>
 
-      {/* Mobile bottom-nav-style tabs under header */}
-      <nav className="mx-3 mt-2 flex items-center gap-1 overflow-x-auto rounded-full px-2 py-1.5 sm:hidden glass">
+      {/* Mobile nav tabs */}
+      <nav className="mx-4 flex items-center gap-1 overflow-x-auto lg:hidden">
         {NAV.map((n) => {
           const active = n.to === "/" ? pathname === "/" : pathname.startsWith(n.to);
           return (
             <Link
               key={n.to}
               to={n.to}
-              className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-medium transition ${
-                active ? "glass-chip text-white" : "text-white/60"
+              className={`shrink-0 rounded-lg px-3 py-1.5 text-xs font-medium transition ${
+                active ? "bg-white/10 text-white" : "text-white/50"
               }`}
             >
               {n.label}

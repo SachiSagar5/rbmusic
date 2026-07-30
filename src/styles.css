@@ -4,20 +4,6 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/*
- * Design system definition.
- *
- * The @theme inline block maps CSS custom properties to Tailwind utility
- * classes (e.g. --color-primary -> bg-primary, text-primary).
- *
- * The :root and .dark blocks define the actual color values using oklch.
- * All colors MUST use oklch format.
- *
- * To add a new semantic color:
- * 1. Add the variable to :root (light value) and .dark (dark value)
- * 2. Register it in @theme inline as --color-<name>: var(--<name>)
- */
-
 @theme inline {
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
@@ -98,94 +84,169 @@
 }
 
 .dark {
-  --background: oklch(0.129 0.042 264.695);
-  --foreground: oklch(0.984 0.003 247.858);
-  --card: oklch(0.208 0.042 265.755);
-  --card-foreground: oklch(0.984 0.003 247.858);
-  --popover: oklch(0.208 0.042 265.755);
-  --popover-foreground: oklch(0.984 0.003 247.858);
-  --primary: oklch(0.929 0.013 255.508);
-  --primary-foreground: oklch(0.208 0.042 265.755);
-  --secondary: oklch(0.279 0.041 260.031);
-  --secondary-foreground: oklch(0.984 0.003 247.858);
-  --muted: oklch(0.279 0.041 260.031);
-  --muted-foreground: oklch(0.704 0.04 256.788);
-  --accent: oklch(0.279 0.041 260.031);
-  --accent-foreground: oklch(0.984 0.003 247.858);
+  --background: oklch(0.09 0.025 275);
+  --foreground: oklch(0.98 0.005 285);
+  --card: oklch(0.14 0.04 280);
+  --card-foreground: oklch(0.98 0.005 285);
+  --popover: oklch(0.14 0.04 280);
+  --popover-foreground: oklch(0.98 0.005 285);
+  --primary: oklch(0.7 0.22 310);
+  --primary-foreground: oklch(0.1 0.02 280);
+  --secondary: oklch(0.18 0.04 280);
+  --secondary-foreground: oklch(0.98 0.005 285);
+  --muted: oklch(0.18 0.04 280);
+  --muted-foreground: oklch(0.65 0.04 285);
+  --accent: oklch(0.22 0.08 310);
+  --accent-foreground: oklch(0.98 0.005 285);
   --destructive: oklch(0.704 0.191 22.216);
   --destructive-foreground: oklch(0.984 0.003 247.858);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.551 0.027 264.364);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.208 0.042 265.755);
-  --sidebar-foreground: oklch(0.984 0.003 247.858);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.984 0.003 247.858);
-  --sidebar-accent: oklch(0.279 0.041 260.031);
-  --sidebar-accent-foreground: oklch(0.984 0.003 247.858);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.551 0.027 264.364);
+  --border: oklch(1 0 0 / 8%);
+  --input: oklch(1 0 0 / 12%);
+  --ring: oklch(0.55 0.15 300);
+  --chart-1: oklch(0.55 0.22 310);
+  --chart-2: oklch(0.6 0.15 200);
+  --chart-3: oklch(0.7 0.18 80);
+  --chart-4: oklch(0.55 0.22 330);
+  --chart-5: oklch(0.6 0.2 20);
+  --sidebar: oklch(0.11 0.03 280);
+  --sidebar-foreground: oklch(0.98 0.005 285);
+  --sidebar-primary: oklch(0.55 0.22 310);
+  --sidebar-primary-foreground: oklch(0.98 0.005 285);
+  --sidebar-accent: oklch(0.18 0.06 310);
+  --sidebar-accent-foreground: oklch(0.98 0.005 285);
+  --sidebar-border: oklch(1 0 0 / 8%);
+  --sidebar-ring: oklch(0.55 0.15 300);
 }
 
 @layer base {
   * {
     border-color: var(--color-border);
+    scrollbar-width: thin;
+    scrollbar-color: oklch(1 0 0 / 15%) transparent;
   }
 
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
   }
+
+  input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    background: transparent;
+    cursor: pointer;
+  }
+  input[type="range"]::-webkit-slider-runnable-track {
+    height: 4px;
+    border-radius: 2px;
+    background: oklch(1 0 0 / 12%);
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: oklch(0.7 0.22 310);
+    margin-top: -4px;
+    border: 2px solid oklch(1 0 0 / 30%);
+    box-shadow: 0 0 12px oklch(0.7 0.22 310 / 40%);
+  }
+  input[type="range"]::-moz-range-track {
+    height: 4px;
+    border-radius: 2px;
+    background: oklch(1 0 0 / 12%);
+  }
+  input[type="range"]::-moz-range-thumb {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: oklch(0.7 0.22 310);
+    border: 2px solid oklch(1 0 0 / 30%);
+  }
 }
 
-/* ---------- iOS Liquid Glass ---------- */
 @utility glass {
   background: linear-gradient(
     135deg,
-    color-mix(in oklab, white 14%, transparent) 0%,
-    color-mix(in oklab, white 4%, transparent) 45%,
-    color-mix(in oklab, white 8%, transparent) 100%
+    color-mix(in oklab, white 12%, transparent) 0%,
+    color-mix(in oklab, white 3%, transparent) 50%,
+    color-mix(in oklab, white 6%, transparent) 100%
   );
-  backdrop-filter: blur(28px) saturate(180%);
-  border: 1px solid color-mix(in oklab, white 18%, transparent);
+  backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid color-mix(in oklab, white 12%, transparent);
   box-shadow:
-    inset 0 1px 0 0 color-mix(in oklab, white 35%, transparent),
-    inset 0 -1px 0 0 color-mix(in oklab, black 25%, transparent),
-    0 10px 40px -10px color-mix(in oklab, black 55%, transparent);
+    inset 0 1px 0 0 color-mix(in oklab, white 25%, transparent),
+    0 8px 32px -12px oklch(0 0 0 / 50%);
 }
 
 @utility glass-strong {
   background: linear-gradient(
     135deg,
-    color-mix(in oklab, white 22%, transparent) 0%,
-    color-mix(in oklab, white 8%, transparent) 50%,
-    color-mix(in oklab, white 14%, transparent) 100%
+    color-mix(in oklab, white 18%, transparent) 0%,
+    color-mix(in oklab, white 6%, transparent) 50%,
+    color-mix(in oklab, white 10%, transparent) 100%
   );
-  backdrop-filter: blur(40px) saturate(200%);
-  border: 1px solid color-mix(in oklab, white 25%, transparent);
+  backdrop-filter: blur(36px) saturate(200%);
+  border: 1px solid color-mix(in oklab, white 18%, transparent);
   box-shadow:
-    inset 0 1px 0 0 color-mix(in oklab, white 45%, transparent),
-    inset 0 -1px 0 0 color-mix(in oklab, black 30%, transparent),
-    0 20px 60px -15px color-mix(in oklab, black 65%, transparent);
+    inset 0 1px 0 0 color-mix(in oklab, white 35%, transparent),
+    0 12px 48px -16px oklch(0 0 0 / 60%);
+}
+
+@utility glass-card {
+  background: linear-gradient(
+    135deg,
+    color-mix(in oklab, white 10%, transparent) 0%,
+    color-mix(in oklab, white 2%, transparent) 100%
+  );
+  backdrop-filter: blur(20px) saturate(160%);
+  border: 1px solid color-mix(in oklab, white 8%, transparent);
+  box-shadow:
+    inset 0 1px 0 0 color-mix(in oklab, white 15%, transparent),
+    0 4px 24px -8px oklch(0 0 0 / 40%);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 @utility glass-panel {
-  background: color-mix(in oklab, #1a0f2e 55%, transparent);
-  backdrop-filter: blur(48px) saturate(180%);
-  border: 1px solid color-mix(in oklab, white 15%, transparent);
+  background: linear-gradient(
+    135deg,
+    color-mix(in oklab, #1a0f2e 50%, transparent) 0%,
+    color-mix(in oklab, #0f0a1a 40%, transparent) 100%
+  );
+  backdrop-filter: blur(40px) saturate(180%);
+  border: 1px solid color-mix(in oklab, white 12%, transparent);
   box-shadow:
-    inset 0 1px 0 0 color-mix(in oklab, white 30%, transparent),
-    0 -8px 32px -8px color-mix(in oklab, black 40%, transparent);
+    inset 0 1px 0 0 color-mix(in oklab, white 25%, transparent),
+    0 -4px 24px -8px oklch(0 0 0 / 40%);
 }
 
 @utility glass-chip {
-  background: color-mix(in oklab, white 10%, transparent);
-  backdrop-filter: blur(20px) saturate(180%);
-  border: 1px solid color-mix(in oklab, white 18%, transparent);
-  box-shadow: inset 0 1px 0 0 color-mix(in oklab, white 30%, transparent);
+  background: color-mix(in oklab, white 8%, transparent);
+  backdrop-filter: blur(16px) saturate(180%);
+  border: 1px solid color-mix(in oklab, white 12%, transparent);
+  box-shadow: inset 0 1px 0 0 color-mix(in oklab, white 20%, transparent);
+}
+
+@utility glow-fuchsia {
+  box-shadow: 0 0 24px oklch(0.7 0.22 310 / 25%);
+}
+
+@utility text-gradient {
+  background: linear-gradient(135deg, oklch(0.75 0.2 310), oklch(0.6 0.18 340), oklch(0.5 0.15 270));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+@keyframes float-slow {
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  50% { transform: translate3d(-1%, 1%, 0); }
+}
+@keyframes float-glow {
+  0%, 100% { transform: scale(1); opacity: 0.6; }
+  50% { transform: scale(1.05); opacity: 0.8; }
+}
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
 }

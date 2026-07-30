@@ -68,13 +68,13 @@ export function CardGrid({ items }: { items: Item[] }) {
   };
 
   return (
-    <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
       {items.map((it, i) => (
         <Link
           key={it.id}
           to={it.to}
           params={{ id: it.id }}
-          className="group overflow-hidden rounded-3xl p-3 glass transition duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-fuchsia-500/20 animate-in fade-in"
+          className="group overflow-hidden rounded-[1.25rem] bg-white/[3%] p-3 ring-1 ring-white/[6%] transition-all duration-300 hover:-translate-y-1 hover:bg-white/[5%] hover:ring-fuchsia-500/25 hover:shadow-lg hover:shadow-fuchsia-500/10 animate-in fade-in"
           style={{ animationDelay: `${(i % 10) * 50}ms` }}
         >
           <div className={`relative aspect-square overflow-hidden bg-white/10 ${it.round ? "rounded-full" : "rounded-xl"}`}>
@@ -83,12 +83,13 @@ export function CardGrid({ items }: { items: Item[] }) {
                 src={pickImg(it.image)}
                 alt={decode(it.name)}
                 loading="lazy"
-                className="h-full w-full object-cover transition group-hover:scale-105"
+                className="h-full w-full object-cover transition-all duration-500 group-hover:scale-105"
               />
             )}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
             <div className="absolute left-2 top-2 flex gap-1.5">
               {!it.round && (
-                <span className="rounded-full bg-black/50 px-2 py-0.5 text-[10px] font-semibold text-white/90 backdrop-blur-sm ring-1 ring-white/10">
+                <span className="rounded-full bg-black/50 px-2 py-0.5 text-[9px] font-semibold text-white/90 backdrop-blur-sm ring-1 ring-white/10">
                   {it.to === "/album/$id" ? "Album" : it.to === "/playlist/$id" ? "Playlist" : "Artist"}
                 </span>
               )}
@@ -103,11 +104,11 @@ export function CardGrid({ items }: { items: Item[] }) {
               }}
               className={`absolute inset-0 grid place-items-center bg-black/40 opacity-0 transition group-hover:opacity-100 focus:opacity-100 ${it.round ? "rounded-full" : ""}`}
             >
-              <span className="grid h-12 w-12 translate-y-2 place-items-center rounded-full bg-gradient-to-br from-fuchsia-500 to-indigo-500 text-white shadow-xl shadow-fuchsia-500/40 transition group-hover:translate-y-0">
+              <span className="grid h-12 w-12 translate-y-2 place-items-center rounded-full bg-gradient-to-br from-fuchsia-500 to-purple-500 text-white shadow-xl shadow-fuchsia-500/40 transition-all group-hover:translate-y-0 group-hover:shadow-fuchsia-500/60">
                 {loadingId === it.id ? (
                   <span className="block h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />
                 ) : (
-                  <svg viewBox="0 0 24 24" className="h-5 w-5" fill="currentColor">
+                  <svg viewBox="0 0 24 24" className="h-5 w-5 ml-0.5" fill="currentColor">
                     <path d="M8 5v14l11-7z" />
                   </svg>
                 )}
@@ -131,7 +132,7 @@ export function CardGrid({ items }: { items: Item[] }) {
               </button>
             )}
           </div>
-          <p className="mt-3 line-clamp-1 px-1 text-sm font-semibold text-white">{decode(it.name)}</p>
+          <p className="mt-3 line-clamp-1 px-1 text-sm font-semibold text-white transition-colors group-hover:text-fuchsia-300">{decode(it.name)}</p>
           {it.subtitle && (
             <p className="mt-0.5 line-clamp-1 px-1 text-xs text-white/50">{it.subtitle}</p>
           )}

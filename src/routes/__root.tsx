@@ -6,8 +6,9 @@ import {
   useRouter,
   HeadContent,
   Scripts,
+  useRouterState,
 } from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -30,7 +31,7 @@ function NotFoundComponent() {
         <div className="mt-6">
           <Link
             to="/"
-            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+            className="inline-flex items-center justify-center rounded-full bg-fuchsia-500 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-fuchsia-400 active:scale-95"
           >
             Go home
           </Link>
@@ -62,13 +63,13 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
               router.invalidate();
               reset();
             }}
-            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+            className="inline-flex items-center justify-center rounded-full bg-fuchsia-500 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-fuchsia-400 active:scale-95"
           >
             Try again
           </button>
           <a
             href="/"
-            className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
+            className="inline-flex items-center justify-center rounded-full border border-white/15 bg-white/5 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-white/10 active:scale-95"
           >
             Go home
           </a>
@@ -115,7 +116,7 @@ function RootShell({ children }: { children: ReactNode }) {
       <head>
         <HeadContent />
       </head>
-      <body>
+      <body className="antialiased">
         {children}
         <Scripts />
       </body>
@@ -123,35 +124,114 @@ function RootShell({ children }: { children: ReactNode }) {
   );
 }
 
+const SIDEBAR_NAV = [
+  { to: "/", label: "Home", icon: "home" },
+  { to: "/search", label: "Search", icon: "search" },
+  { to: "/library", label: "Library", icon: "library" },
+  { to: "/playlists", label: "Playlists", icon: "music" },
+] as const;
+
+function Sidebar() {
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+
+  const icons: Record<string, ReactNode> = {
+    home: <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" strokeLinecap="round" strokeLinejoin="round" /></svg>,
+    search: <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="11" cy="11" r="7" strokeLinecap="round" strokeLinejoin="round"/><path d="m20 20-3-3" strokeLinecap="round" strokeLinejoin="round"/></svg>,
+    library: <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M8 4v16M16 4v16M4 8h16M4 16h16" strokeLinecap="round" strokeLinejoin="round"/></svg>,
+    music: <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M9 18V5l12-2v13" strokeLinecap="round" strokeLinejoin="round"/><circle cx="6" cy="18" r="3" strokeLinecap="round" strokeLinejoin="round"/><circle cx="18" cy="16" r="3" strokeLinecap="round" strokeLinejoin="round"/></svg>,
+  };
+
+  return (
+    <aside className="fixed left-0 top-0 z-30 hidden h-full w-60 flex-col border-r border-white/[3%] bg-[#06030e] lg:flex">
+      <div className="flex items-center gap-2.5 px-6 pt-6 pb-5">
+        <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-fuchsia-500 via-purple-500 to-indigo-500 shadow-lg shadow-fuchsia-500/30 ring-1 ring-white/20">
+          <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5 text-white">
+            <path d="M9 18V6l10-2v12" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+            <circle cx="6" cy="18" r="3" stroke="currentColor" strokeWidth="1.8" />
+            <circle cx="16" cy="16" r="3" stroke="currentColor" strokeWidth="1.8" />
+          </svg>
+        </div>
+        <div>
+          <span className="block text-base font-bold tracking-tight text-white">RB Music</span>
+          <span className="block text-[10px] font-medium tracking-wide text-fuchsia-400/70 uppercase">Stream Unlimited</span>
+        </div>
+      </div>
+
+      <nav className="flex-1 px-3 py-2">
+        <p className="mb-2 px-3 text-[10px] font-semibold uppercase tracking-[0.15em] text-white/30">Menu</p>
+        {SIDEBAR_NAV.map((n) => {
+          const active = n.to === "/" ? pathname === "/" : pathname.startsWith(n.to);
+          return (
+            <Link
+              key={n.to}
+              to={n.to}
+              className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 ${
+                active
+                  ? "bg-gradient-to-r from-fuchsia-500/15 to-purple-500/10 text-white shadow-sm shadow-fuchsia-500/10"
+                  : "text-white/50 hover:bg-white/5 hover:text-white/80"
+              }`}
+            >
+              <span className={`${active ? "text-fuchsia-400" : "text-white/40"}`}>{icons[n.icon]}</span>
+              {n.label}
+              {active && <span className="ml-auto h-1.5 w-1.5 rounded-full bg-fuchsia-400" />}
+            </Link>
+          );
+        })}
+      </nav>
+
+      <div className="border-t border-white/[3%] px-3 py-3">
+        <Link
+          to="/dashboard"
+          className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-white/50 transition hover:bg-white/5 hover:text-white/80"
+        >
+          <svg viewBox="0 0 24 24" className="h-5 w-5 text-white/40" fill="none" stroke="currentColor" strokeWidth="1.5">
+            <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" strokeLinecap="round" strokeLinejoin="round" />
+            <circle cx="12" cy="7" r="4" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+          Account
+        </Link>
+      </div>
+    </aside>
+  );
+}
+
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
     <QueryClientProvider client={queryClient}>
       <DeviceProvider>
         <PlayerProvider>
           <AuthProvider>
-            <div className="relative min-h-screen overflow-hidden bg-[#07040f] text-white">
-            <NowPlayingBackdrop />
-            {/* Liquid glass ambient background */}
-            <div className="pointer-events-none fixed -top-40 -left-32 h-[620px] w-[620px] rounded-full bg-fuchsia-500/40 blur-[120px]" />
-            <div className="pointer-events-none fixed top-40 right-0 h-[520px] w-[520px] rounded-full bg-indigo-500/35 blur-[110px]" />
-            <div className="pointer-events-none fixed bottom-0 left-1/3 h-[480px] w-[480px] rounded-full bg-cyan-400/20 blur-[120px]" />
-            <div className="pointer-events-none fixed -bottom-20 right-1/4 h-[420px] w-[420px] rounded-full bg-pink-500/25 blur-[100px]" />
-            <div className="relative z-10">
-              <AppHeader />
-              <main className="mx-3 max-w-7xl px-4 pb-48 pt-6 sm:mx-auto sm:px-6 sm:pb-40">
-                <Outlet />
-              </main>
+            <div className="relative min-h-screen overflow-hidden bg-[#06030e] text-white">
+              <NowPlayingBackdrop />
+              <div className="pointer-events-none fixed -top-40 -left-32 h-[620px] w-[620px] rounded-full bg-fuchsia-500/30 blur-[120px] animate-pulse" style={{ animationDuration: "8s" }} />
+              <div className="pointer-events-none fixed top-60 right-0 h-[520px] w-[520px] rounded-full bg-indigo-500/25 blur-[110px] animate-pulse" style={{ animationDuration: "10s" }} />
+              <div className="pointer-events-none fixed bottom-0 left-1/4 h-[480px] w-[480px] rounded-full bg-purple-500/20 blur-[120px] animate-pulse" style={{ animationDuration: "12s" }} />
+              <div className="pointer-events-none fixed -bottom-20 right-1/4 h-[420px] w-[420px] rounded-full bg-pink-500/20 blur-[100px] animate-pulse" style={{ animationDuration: "9s" }} />
+
+              <div className="relative z-10 flex">
+                <Sidebar />
+
+                <div className="flex min-w-0 flex-1 flex-col lg:ml-60">
+                  <AppHeader onMenuToggle={() => setMobileOpen(!mobileOpen)} />
+
+                  <main className="flex-1 px-4 pb-48 pt-4 sm:px-6 sm:pb-40 lg:px-8 xl:px-10">
+                    <Outlet />
+                  </main>
+                </div>
+              </div>
+
+              <PlayerBar />
             </div>
-            <PlayerBar />
-          </div>
-          <p className="fixed inset-x-0 bottom-0 z-20 pb-6 text-center text-[10px] leading-none text-white/30 sm:pb-7">
-            Developed by{" "}
-            <a href="https://t.me/zukosgr" target="_blank" rel="noopener noreferrer" className="text-fuchsia-300/60 hover:text-fuchsia-300 transition-colors">
-              @zukosgr
-            </a>
-          </p>
+            <p className="fixed inset-x-0 bottom-0 z-20 pb-4 text-center text-[10px] leading-none text-white/25">
+              Developed by{" "}
+              <a href="https://t.me/zukosgr" target="_blank" rel="noopener noreferrer" className="text-fuchsia-400/50 hover:text-fuchsia-400 transition-colors">
+                @zukosgr
+              </a>
+            </p>
           </AuthProvider>
         </PlayerProvider>
       </DeviceProvider>
