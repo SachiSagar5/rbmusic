@@ -161,6 +161,29 @@ export function PlayerBar() {
   );
 }
 
+function CastButton() {
+  const p = usePlayer();
+  return (
+    <div className="relative">
+      <ToggleIcon
+        on={p.casting}
+        title={p.casting ? "Playing on another device" : "Play on TV, speaker or PC"}
+        onClick={() => void p.openCastPicker()}
+      >
+        <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
+          <path d="M3 18h.01M3 14a7 7 0 0 1 7 7M3 10a11 11 0 0 1 11 11" strokeLinecap="round" />
+          <path d="M3 7V6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-6" strokeLinecap="round" />
+        </svg>
+      </ToggleIcon>
+      {p.castError && (
+        <div className="absolute bottom-11 right-0 w-64 rounded-2xl glass-panel p-3 text-[11px] leading-snug text-white/80 shadow-xl">
+          {p.castError}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function ToggleIcon({
   children,
   on,
