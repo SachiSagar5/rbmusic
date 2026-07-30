@@ -39,6 +39,7 @@ type Ctx = {
   castAvailable: boolean;
   casting: boolean;
   castError: string | null;
+  setCastError: (v: string | null) => void;
   openCastPicker: () => Promise<void>;
   eqGains: number[];
   boost: number;
@@ -446,6 +447,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       castAvailable,
       casting,
       castError,
+      setCastError,
       openCastPicker,
       playList,
       playSong,
@@ -468,7 +470,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       applyEqPreset,
       setBoost,
     }),
-    [queue, index, current, playing, progress, duration, volume, shuffle, repeat, showQueue, showLyrics, showEq, eqEnabled, eqGains, boost, eqError, castAvailable, casting, castError, openCastPicker, playList, playSong, toggle, next, prev, seek, setVolume, toggleShuffle, cycleRepeat, addToQueue, removeFromQueue, jumpTo, enableEq, disableEq, setEqBand, applyEqPreset, setBoost],
+    [queue, index, current, playing, progress, duration, volume, shuffle, repeat, showQueue, showLyrics, showEq, eqEnabled, eqGains, boost, eqError, castAvailable, casting, castError, setCastError, openCastPicker, playList, playSong, toggle, next, prev, seek, setVolume, toggleShuffle, cycleRepeat, addToQueue, removeFromQueue, jumpTo, enableEq, disableEq, setEqBand, applyEqPreset, setBoost],
   );
 
   return (

@@ -163,7 +163,7 @@ export function PlayerBar() {
 
 function CastButton() {
   const p = usePlayer();
-  React.useEffect(() => {
+  useEffect(() => {
     if (!p.castError) return;
     const t = setTimeout(() => p.setCastError(null), 7000);
     return () => clearTimeout(t);
