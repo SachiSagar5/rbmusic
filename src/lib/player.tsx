@@ -159,8 +159,16 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
         "This browser can't discover nearby devices. Use Chrome (Cast) or Safari (AirPlay), or cast the whole tab from the browser menu.",
       );
     } catch (e: any) {
-      if (e?.name !== "NotAllowedError" && e?.name !== "AbortError")
-        setCastError(e?.message || "No nearby devices found");
+      // User closed the picker — not an error worth surfacing.
+      if (e?.name === "NotAllowedError" || e?.name === "AbortError") return;
+      const msg = String(e?.message || "");
+      if (e?.name === "NotFoundError" || /no remote playback devices/i.test(msg)) {
+        setCastError(
+          "No devices found on this network. Make sure your TV, speaker or PC is powered on, connected to the same Wi-Fi, and Cast/AirPlay enabled — then try again. You can also use the browser menu → Cast to mirror this tab.",
+        );
+      } else {
+        setCastError(msg || "Couldn't start casting.");
+      }
     }
   }, []);
 
