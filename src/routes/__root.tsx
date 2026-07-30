@@ -84,16 +84,21 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" },
+      { name: "theme-color", content: "#06030e" },
       { title: "RB Music — Stream Music You Love" },
       { name: "description", content: "Search and stream millions of songs, albums, artists and playlists instantly with RB Music." },
       { property: "og:title", content: "RB Music — Stream Music You Love" },
       { property: "og:description", content: "Search and stream millions of songs, albums, artists and playlists instantly with RB Music." },
       { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://sachisagar5.github.io/rbmusic/" },
+      { property: "og:locale", content: "en_IN" },
+      { property: "og:site_name", content: "RB Music" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "RB Music — Stream Music You Love" },
       { name: "twitter:description", content: "Search and stream millions of songs, albums, artists and playlists instantly with RB Music." },
       { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/101abaab-570b-450e-aa00-5927854f0c9d" },
       { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/101abaab-570b-450e-aa00-5927854f0c9d" },
+      { name: "google-site-verification", content: "" },
     ],
     links: [
       {
@@ -102,6 +107,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       { rel: "icon", href: "/favicon.svg", type: "image/svg+xml" },
       { rel: "alternate icon", href: "/favicon.ico", type: "image/x-icon" },
+      { rel: "canonical", href: "https://sachisagar5.github.io/rbmusic/" },
     ],
   }),
   shellComponent: RootShell,
@@ -116,6 +122,20 @@ function RootShell({ children }: { children: ReactNode }) {
       <head>
         <script dangerouslySetInnerHTML={{
           __html: `(function(){try{var t=localStorage.getItem("rbm:theme");if(t==="light"){document.documentElement.setAttribute("data-theme","light")}else if(!t&&window.matchMedia("(prefers-color-scheme:light)").matches){document.documentElement.setAttribute("data-theme","light")}}catch(e){}})()`
+        }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "WebSite",
+            name: "RB Music",
+            url: "https://sachisagar5.github.io/rbmusic/",
+            description: "Search and stream millions of songs, albums, artists and playlists instantly.",
+            potentialAction: {
+              "@type": "SearchAction",
+              target: "https://sachisagar5.github.io/rbmusic/search?q={search_term_string}",
+              "query-input": "required name=search_term_string",
+            },
+          }),
         }} />
         <HeadContent />
       </head>

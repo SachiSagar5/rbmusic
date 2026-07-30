@@ -33,7 +33,7 @@ export function PlayerBar() {
             {/* Track info */}
             <div className="flex min-w-0 flex-1 items-center gap-3">
               <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-xl bg-white/10 ring-1 ring-white/15 sm:h-14 sm:w-14">
-                {img && <img src={img} alt="" className="h-full w-full object-cover" />}
+                {img && <img src={img} alt="" loading="lazy" decoding="async" className="h-full w-full object-cover" />}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
               </div>
               <div className="min-w-0">

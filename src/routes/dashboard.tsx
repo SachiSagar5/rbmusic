@@ -7,7 +7,13 @@ export const Route = createFileRoute("/dashboard")({
   head: () => ({
     meta: [
       { title: "Dashboard — RB Music" },
-      { name: "description", content: "Your RB Music dashboard." },
+      { name: "description", content: "Your RB Music dashboard — liked songs, playlists and downloads at a glance." },
+      { property: "og:title", content: "Dashboard — RB Music" },
+      { property: "og:description", content: "Your personal RB Music dashboard." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "Dashboard — RB Music" },
+      { name: "twitter:description", content: "Your personal RB Music dashboard." },
     ],
   }),
   component: DashboardPage,

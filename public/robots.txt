@@ -12,3 +12,5 @@ Allow: /
 
 User-agent: *
 Allow: /
+
+Sitemap: https://sachisagar5.github.io/rbmusic/sitemap.xml

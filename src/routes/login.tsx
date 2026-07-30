@@ -6,7 +6,13 @@ export const Route = createFileRoute("/login")({
   head: () => ({
     meta: [
       { title: "Sign In — RB Music" },
-      { name: "description", content: "Sign in to RB Music." },
+      { name: "description", content: "Sign in to RB Music to access your library, playlists and downloads." },
+      { property: "og:title", content: "Sign In — RB Music" },
+      { property: "og:description", content: "Sign in to access your library and playlists on RB Music." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "Sign In — RB Music" },
+      { name: "twitter:description", content: "Sign in to access your library and playlists on RB Music." },
     ],
   }),
   component: LoginPage,

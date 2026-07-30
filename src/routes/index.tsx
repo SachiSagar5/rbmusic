@@ -1,9 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { z } from "zod";
 import { Link } from "@tanstack/react-router";
 import { SongList } from "@/components/SongList";
+import { LazySection } from "@/components/LazySection";
 import { usePlayer } from "@/lib/player";
 import {
   searchAlbums,
@@ -58,24 +59,51 @@ type Home = {
 function HomeView() {
   const [data, setData] = useState<Home | null>(null);
   const [loading, setLoading] = useState(true);
+  const deferred = useRef(false);
+
+  useEffect(() => {
+    if (data?.trending?.[0]) {
+      document.title = `${decode(data.trending[0].name)} — RB Music`;
+    } else {
+      document.title = "RB Music — Stream Music You Love";
+    }
+  }, [data]);
 
   useEffect(() => {
     let ignore = false;
     setLoading(true);
-    Promise.all([
-      searchSongs("Trending", 20).catch(() => [] as SSong[]),
-      searchPlaylists("Top Charts", 12).catch(() => [] as SPlaylist[]),
-      searchAlbums("New Releases", 12).catch(() => [] as SAlbum[]),
-      searchPlaylists("Bollywood Hits", 12).catch(() => [] as SPlaylist[]),
-      searchPlaylists("English Top", 12).catch(() => [] as SPlaylist[]),
-      searchPlaylists("Punjabi Hits", 12).catch(() => [] as SPlaylist[]),
-      searchPlaylists("Romantic", 12).catch(() => [] as SPlaylist[]),
-      searchArtists("Top Artists", 14).catch(() => [] as SArtistFull[]),
-    ]).then(([trending, charts, newReleases, bollywood, english, punjabi, romance, artists]) => {
-      if (ignore) return;
-      setData({ trending, charts, newReleases, bollywood, english, punjabi, romance, artists });
-      setLoading(false);
-    });
+
+    searchSongs("Trending", 20)
+      .then((trending) => {
+        if (ignore) return;
+        setData((prev) => ({ ...prev, trending } as Home));
+        setLoading(false);
+
+        if (typeof requestIdleCallback !== "undefined") {
+          requestIdleCallback(() => fetchRemaining(), { timeout: 2000 });
+        } else {
+          setTimeout(fetchRemaining, 200);
+        }
+      })
+      .catch(() => setLoading(false));
+
+    function fetchRemaining() {
+      if (deferred.current) return;
+      deferred.current = true;
+      Promise.all([
+        searchPlaylists("Top Charts", 12).catch(() => [] as SPlaylist[]),
+        searchAlbums("New Releases", 12).catch(() => [] as SAlbum[]),
+        searchPlaylists("Bollywood Hits", 12).catch(() => [] as SPlaylist[]),
+        searchPlaylists("English Top", 12).catch(() => [] as SPlaylist[]),
+        searchPlaylists("Punjabi Hits", 12).catch(() => [] as SPlaylist[]),
+        searchPlaylists("Romantic", 12).catch(() => [] as SPlaylist[]),
+        searchArtists("Top Artists", 14).catch(() => [] as SArtistFull[]),
+      ]).then(([charts, newReleases, bollywood, english, punjabi, romance, artists]) => {
+        if (ignore) return;
+        setData((prev) => ({ ...prev, charts, newReleases, bollywood, english, punjabi, romance, artists } as Home));
+      });
+    }
+
     return () => {
       ignore = true;
     };
@@ -87,47 +115,61 @@ function HomeView() {
 
       <ExpandableSongList songs={data?.trending ?? []} loading={loading} />
 
-      <Row title="Top Charts" loading={loading}>
-        {data?.charts.map((p) => (
-          <PlaylistCard key={p.id} p={p} />
-        ))}
-      </Row>
+      <LazySection>
+        <Row title="Top Charts" loading={!data?.charts?.length}>
+          {data?.charts?.map((p) => (
+            <PlaylistCard key={p.id} p={p} />
+          ))}
+        </Row>
+      </LazySection>
 
-      <Row title="New Releases" loading={loading}>
-        {data?.newReleases.map((a) => (
-          <AlbumCard key={a.id} a={a} />
-        ))}
-      </Row>
+      <LazySection>
+        <Row title="New Releases" loading={!data?.newReleases?.length}>
+          {data?.newReleases?.map((a) => (
+            <AlbumCard key={a.id} a={a} />
+          ))}
+        </Row>
+      </LazySection>
 
-      <Row title="Bollywood Hits" loading={loading}>
-        {data?.bollywood.map((p) => (
-          <PlaylistCard key={p.id} p={p} />
-        ))}
-      </Row>
+      <LazySection>
+        <Row title="Bollywood Hits" loading={!data?.bollywood?.length}>
+          {data?.bollywood?.map((p) => (
+            <PlaylistCard key={p.id} p={p} />
+          ))}
+        </Row>
+      </LazySection>
 
-      <Row title="English Top" loading={loading}>
-        {data?.english.map((p) => (
-          <PlaylistCard key={p.id} p={p} />
-        ))}
-      </Row>
+      <LazySection>
+        <Row title="English Top" loading={!data?.english?.length}>
+          {data?.english?.map((p) => (
+            <PlaylistCard key={p.id} p={p} />
+          ))}
+        </Row>
+      </LazySection>
 
-      <Row title="Popular Artists" loading={loading}>
-        {data?.artists.map((a) => (
-          <ArtistCard key={a.id} a={a} />
-        ))}
-      </Row>
+      <LazySection>
+        <Row title="Popular Artists" loading={!data?.artists?.length}>
+          {data?.artists?.map((a) => (
+            <ArtistCard key={a.id} a={a} />
+          ))}
+        </Row>
+      </LazySection>
 
-      <Row title="Punjabi Hits" loading={loading}>
-        {data?.punjabi.map((p) => (
-          <PlaylistCard key={p.id} p={p} />
-        ))}
-      </Row>
+      <LazySection>
+        <Row title="Punjabi Hits" loading={!data?.punjabi?.length}>
+          {data?.punjabi?.map((p) => (
+            <PlaylistCard key={p.id} p={p} />
+          ))}
+        </Row>
+      </LazySection>
 
-      <Row title="Romantic Moods" loading={loading}>
-        {data?.romance.map((p) => (
-          <PlaylistCard key={p.id} p={p} />
-        ))}
-      </Row>
+      <LazySection>
+        <Row title="Romantic Moods" loading={!data?.romance?.length}>
+          {data?.romance?.map((p) => (
+            <PlaylistCard key={p.id} p={p} />
+          ))}
+        </Row>
+      </LazySection>
     </div>
   );
 }
@@ -386,6 +428,8 @@ function Hero({ songs, loading }: { songs: SSong[]; loading: boolean }) {
                   key={s.id}
                   src={pickImg(s.image)}
                   alt={decode(s.name)}
+                  loading={i === 0 ? "eager" : "lazy"}
+                  decoding="async"
                   className={`absolute inset-0 h-full w-full object-cover transition-all duration-700 ${
                     i === slide ? "scale-100 opacity-100" : "scale-110 opacity-0"
                   }`}
@@ -529,7 +573,7 @@ function PlaylistCard({ p }: { p: SPlaylist }) {
     >
       <div className="relative aspect-square overflow-hidden rounded-[1.25rem] bg-white/5 ring-1 ring-white/8 transition-all duration-300 group-hover:-translate-y-1 group-hover:ring-fuchsia-500/30 group-hover:shadow-lg group-hover:shadow-fuchsia-500/15">
         {pickImg(p.image) && (
-          <img src={pickImg(p.image)} alt={decode(p.name)} loading="lazy" className="h-full w-full object-cover transition-all duration-500 group-hover:scale-105" />
+          <img src={pickImg(p.image)} alt={decode(p.name)} loading="lazy" decoding="async" className="h-full w-full object-cover transition-all duration-500 group-hover:scale-105" />
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
         <div className="absolute left-2 top-2">
@@ -552,7 +596,7 @@ function AlbumCard({ a }: { a: SAlbum }) {
     <Link to="/album/$id" params={{ id: a.id }} className="group relative w-40 shrink-0 snap-start sm:w-44">
       <div className="relative aspect-square overflow-hidden rounded-[1.25rem] bg-white/5 ring-1 ring-white/8 transition-all duration-300 group-hover:-translate-y-1 group-hover:ring-fuchsia-500/30 group-hover:shadow-lg group-hover:shadow-fuchsia-500/15">
         {pickImg(a.image) && (
-          <img src={pickImg(a.image)} alt={decode(a.name)} loading="lazy" className="h-full w-full object-cover transition-all duration-500 group-hover:scale-105" />
+          <img src={pickImg(a.image)} alt={decode(a.name)} loading="lazy" decoding="async" className="h-full w-full object-cover transition-all duration-500 group-hover:scale-105" />
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
         <div className="absolute left-2 top-2">
@@ -577,7 +621,7 @@ function ArtistCard({ a }: { a: SArtistFull }) {
     <Link to="/artist/$id" params={{ id: a.id }} className="group w-32 shrink-0 snap-start text-center sm:w-36">
       <div className="relative mx-auto aspect-square w-28 overflow-hidden rounded-full bg-white/5 ring-1 ring-white/8 transition-all duration-300 group-hover:-translate-y-1 group-hover:ring-fuchsia-500/30 group-hover:shadow-lg group-hover:shadow-fuchsia-500/15 sm:w-32">
         {pickImg(a.image) && (
-          <img src={pickImg(a.image)} alt={decode(a.name)} loading="lazy" className="h-full w-full object-cover transition-all duration-500 group-hover:scale-105" />
+          <img src={pickImg(a.image)} alt={decode(a.name)} loading="lazy" decoding="async" className="h-full w-full object-cover transition-all duration-500 group-hover:scale-105" />
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
         <div className="absolute inset-0 grid place-items-center opacity-0 transition-opacity duration-300 group-hover:opacity-100">

@@ -83,6 +83,7 @@ export function CardGrid({ items }: { items: Item[] }) {
                 src={pickImg(it.image)}
                 alt={decode(it.name)}
                 loading="lazy"
+                decoding="async"
                 className="h-full w-full object-cover transition-all duration-500 group-hover:scale-105"
               />
             )}

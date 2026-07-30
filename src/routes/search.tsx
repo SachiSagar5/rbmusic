@@ -9,6 +9,12 @@ export const Route = createFileRoute("/search")({
     meta: [
       { title: "Search — RB Music" },
       { name: "description", content: "Search songs, albums, artists and playlists on RB Music." },
+      { property: "og:title", content: "Search — RB Music" },
+      { property: "og:description", content: "Search songs, albums, artists and playlists on RB Music." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "Search — RB Music" },
+      { name: "twitter:description", content: "Search songs, albums, artists and playlists on RB Music." },
     ],
   }),
   component: SearchPage,

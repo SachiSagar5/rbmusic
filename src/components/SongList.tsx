@@ -122,7 +122,7 @@ export function SongList({
                 className="relative h-10 w-10 shrink-0 overflow-hidden rounded-xl bg-white/10 ring-1 ring-white/10"
                 aria-label={`Play ${decode(s.name)}`}
               >
-                <img src={pickImg(s.image)} alt="" className="h-full w-full object-cover" loading="lazy" />
+                <img src={pickImg(s.image)} alt="" loading="lazy" decoding="async" className="h-full w-full object-cover" />
                 <span className={`absolute inset-0 grid place-items-center bg-black/50 opacity-0 transition group-hover:opacity-100 ${isCurrent ? "opacity-100" : ""}`}>
                   <svg viewBox="0 0 24 24" className="h-4 w-4 text-white" fill="currentColor">
                     <path d="M8 5v14l11-7z" />
