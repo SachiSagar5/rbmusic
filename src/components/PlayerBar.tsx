@@ -1,41 +1,35 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { usePlayer } from "@/lib/player";
 import { EQ_BANDS, EQ_PRESETS } from "@/lib/player";
 import { decode, fmtTime, getLyrics, pickImg, type Lyrics } from "@/lib/saavn";
-import { DeviceSelector } from "./DeviceSelector";
 
+import { DeviceSelector } from "./DeviceSelector";
+import { NowPlayingView } from "./NowPlayingView";
 export function PlayerBar() {
   const p = usePlayer();
   const c = p.current;
   const img = c ? pickImg(c.image) : null;
+  const [showNowPlaying, setShowNowPlaying] = useState(false);
 
   return (
     <>
+      {showNowPlaying && <NowPlayingView onClose={() => setShowNowPlaying(false)} />}
       {p.showQueue && <QueueDrawer />}
       {p.showLyrics && <LyricsDrawer />}
       {p.showEq && <EqDrawer />}
       {c && <div className="fixed inset-x-0 bottom-0 z-30 pb-[env(safe-area-inset-bottom)] animate-in slide-in-from-bottom-4 fade-in duration-300">
         <div className="mx-2 mb-2 rounded-[1.25rem] bg-[#0d0a1a]/95 backdrop-blur-2xl ring-1 ring-white/[8%] shadow-2xl shadow-black/60 sm:mx-auto sm:w-1/2">
           <div className="px-3 pt-1 sm:px-5">
-            <input
-              type="range"
-              min={0}
-              max={p.duration || 0}
-              step={0.1}
-              value={p.progress}
-              onChange={(e) => p.seek(+e.target.value)}
-              aria-label="Seek"
-              className="block h-1 w-full touch-none sm:hidden"
-            />
+            <MobileProgress progress={p.progress} duration={p.duration} onSeek={p.seek} />
           </div>
           <div className="flex items-center gap-2 px-3 py-2 sm:gap-4 sm:px-5 sm:py-3">
             {/* Track info */}
             <div className="flex min-w-0 flex-1 items-center gap-3">
-              <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-xl bg-white/10 ring-1 ring-white/15 sm:h-14 sm:w-14">
+              <button onClick={() => setShowNowPlaying(true)} className="relative h-12 w-12 shrink-0 overflow-hidden rounded-xl bg-white/10 ring-1 ring-white/15 transition hover:ring-fuchsia-400/40 sm:h-14 sm:w-14">
                 {img && <img src={img} alt="" loading="lazy" decoding="async" className="h-full w-full object-cover" />}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
-              </div>
+              </button>
               <div className="min-w-0">
                 <p className="line-clamp-1 text-sm font-bold text-white">
                   {c ? decode(c.name) : "Nothing playing"}
@@ -92,12 +86,7 @@ export function PlayerBar() {
               {/* Desktop seek bar */}
               <div className="hidden w-full max-w-md items-center gap-2 sm:flex">
                 <span className="w-8 text-right text-[10px] tabular-nums text-white/40">{fmtTime(p.progress)}</span>
-                <input
-                  type="range" min={0} max={p.duration || 0} step={0.1} value={p.progress}
-                  onChange={(e) => p.seek(+e.target.value)}
-                  aria-label="Seek"
-                  className="h-1 flex-1 touch-none"
-                />
+                <DesktopProgress progress={p.progress} duration={p.duration} onSeek={p.seek} />
                 <span className="w-8 text-[10px] tabular-nums text-white/40">{fmtTime(p.duration || (c?.duration ?? 0))}</span>
               </div>
             </div>
@@ -141,9 +130,7 @@ export function PlayerBar() {
               <div className="mx-1 h-5 w-px bg-white/10" />
               <div className="flex w-16 items-center gap-1.5 lg:w-20">
                 <svg viewBox="0 0 24 24" className="h-3.5 w-3.5 shrink-0 text-white/40" fill="currentColor"><path d="M3 10v4h4l5 5V5L7 10H3z"/></svg>
-                <input type="range" min={0} max={1} step={0.01} value={p.volume} aria-label="Volume"
-                  onChange={(e) => p.setVolume(+e.target.value)}
-                  className="h-1 flex-1 touch-none min-w-0" />
+                <VolumeSlider volume={p.volume} onChange={p.setVolume} />
               </div>
             </div>
 
@@ -288,6 +275,66 @@ function Drawer({ title, children, onClose }: { title: string; children: React.R
         <div className="max-h-[55vh] overflow-y-auto">{children}</div>
       </aside>
     </>
+  );
+}
+
+function VolumeSlider({ volume, onChange }: { volume: number; onChange: (v: number) => void }) {
+  const pct = volume * 100;
+  const barRef = useRef<HTMLDivElement>(null);
+
+  const onClick = (e: React.MouseEvent) => {
+    const el = barRef.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    const frac = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+    onChange(frac);
+  };
+
+  return (
+    <div ref={barRef} className="relative h-1 flex-1 min-w-0 cursor-pointer rounded-full bg-white/10" onClick={onClick}>
+      <div
+        className="h-full rounded-full bg-gradient-to-r from-fuchsia-500 to-violet-400"
+        style={{ width: `${pct}%` }}
+      />
+    </div>
+  );
+}
+
+function MobileProgress({ progress, duration, onSeek }: { progress: number; duration: number; onSeek: (t: number) => void }) {
+  const pct = duration > 0 ? (progress / duration) * 100 : 0;
+  const barRef = useRef<HTMLDivElement>(null);
+
+  const onClick = (e: React.MouseEvent) => {
+    const el = barRef.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    const frac = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+    onSeek(frac * duration);
+  };
+
+  return (
+    <div ref={barRef} className="relative h-1 w-full cursor-pointer touch-none rounded-full bg-white/10 sm:hidden" onClick={onClick}>
+      <div className="h-full rounded-full bg-gradient-to-r from-fuchsia-500 to-violet-400 transition-[width] duration-75 ease-linear" style={{ width: `${pct}%` }} />
+    </div>
+  );
+}
+
+function DesktopProgress({ progress, duration, onSeek }: { progress: number; duration: number; onSeek: (t: number) => void }) {
+  const pct = duration > 0 ? (progress / duration) * 100 : 0;
+  const barRef = useRef<HTMLDivElement>(null);
+
+  const onClick = (e: React.MouseEvent) => {
+    const el = barRef.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    const frac = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+    onSeek(frac * duration);
+  };
+
+  return (
+    <div ref={barRef} className="relative h-1 flex-1 cursor-pointer rounded-full bg-white/10" onClick={onClick}>
+      <div className="h-full rounded-full bg-gradient-to-r from-fuchsia-500 to-violet-400 transition-[width] duration-75 ease-linear" style={{ width: `${pct}%` }} />
+    </div>
   );
 }
 

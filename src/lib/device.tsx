@@ -30,6 +30,7 @@ type Ctx = {
   discovered: DeviceInfo[];
   activeDeviceId: string | null;
   mode: DeviceMode;
+  serverOnline: boolean;
   setDeviceName: (n: string) => void;
   setActiveDevice: (id: string | null) => void;
   setMode: (m: DeviceMode) => void;
@@ -89,6 +90,7 @@ export function DeviceProvider({ children }: { children: ReactNode }) {
   const [discovered, setDiscovered] = useState<DeviceInfo[]>([]);
   const [activeDeviceId, setActiveDeviceId] = useState<string | null>(null);
   const [mode, setMode] = useState<DeviceMode>("local");
+  const [serverOnline, setServerOnline] = useState(false);
   const deviceTypeRef = useRef<DeviceInfo["type"]>("speaker");
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const objectUrlRef = useRef<string | null>(null);
@@ -115,8 +117,9 @@ export function DeviceProvider({ children }: { children: ReactNode }) {
         currentId = dev.id;
         setDeviceId(dev.id);
         saveDeviceId(dev.id);
+        setServerOnline(true);
       } catch {
-        // offline
+        setServerOnline(false);
       }
     })();
 
@@ -160,7 +163,10 @@ export function DeviceProvider({ children }: { children: ReactNode }) {
     try {
       const all = await fetchDevices();
       setDiscovered(all.filter((d) => d.id !== deviceId));
-    } catch {}
+      setServerOnline(true);
+    } catch {
+      setServerOnline(false);
+    }
   }, [deviceId]);
 
   useEffect(() => {
@@ -290,6 +296,7 @@ export function DeviceProvider({ children }: { children: ReactNode }) {
       discovered,
       activeDeviceId,
       mode,
+      serverOnline,
       setDeviceName,
       setActiveDevice,
       setMode,
@@ -300,7 +307,7 @@ export function DeviceProvider({ children }: { children: ReactNode }) {
       stopDevice,
       refreshDevices,
     }),
-    [deviceId, deviceName, discovered, activeDeviceId, mode, setDeviceName, setActiveDevice, setMode, playOnDevice, pauseDevice, resumeDevice, seekDevice, stopDevice, refreshDevices],
+    [deviceId, deviceName, discovered, activeDeviceId, mode, serverOnline, setDeviceName, setActiveDevice, setMode, playOnDevice, pauseDevice, resumeDevice, seekDevice, stopDevice, refreshDevices],
   );
 
   return <DeviceCtx.Provider value={ctx}>{children}</DeviceCtx.Provider>;
