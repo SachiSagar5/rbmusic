@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { SongList } from "@/components/SongList";
 import { usePlayer } from "@/lib/player";
@@ -14,6 +14,7 @@ import {
 } from "@/lib/library";
 import { allKeys } from "@/lib/idb";
 import type { SSong } from "@/lib/saavn";
+import { useAuth } from "@/lib/auth";
 
 export const Route = createFileRoute("/library")({
   head: () => ({
@@ -32,6 +33,11 @@ export const Route = createFileRoute("/library")({
 type Tab = "liked" | "playlists" | "downloads";
 
 function LibraryPage() {
+  const auth = useAuth();
+  const navigate = useNavigate();
+  if (auth.loading) return null;
+  if (!auth.user) { navigate({ to: "/login" }); return null; }
+
   const [tab, setTab] = useState<Tab>("liked");
   const [likes, setLikes] = useState<SSong[]>(() => getLikes());
   const [pls, setPls] = useState<LocalPlaylist[]>(() => getPlaylists());

@@ -1,8 +1,9 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { CardGrid } from "@/components/CardGrid";
 import { getPlaylists, subscribeLibrary } from "@/lib/library";
 import { searchPlaylists, type SPlaylist } from "@/lib/saavn";
+import { useAuth } from "@/lib/auth";
 
 export const Route = createFileRoute("/playlists")({
   head: () => ({
@@ -21,6 +22,11 @@ export const Route = createFileRoute("/playlists")({
 const CATEGORIES = ["Trending", "Bollywood", "Punjabi", "Workout", "Chill", "Party", "Romance", "Lofi"];
 
 function PlaylistsPage() {
+  const auth = useAuth();
+  const navigate = useNavigate();
+  if (auth.loading) return null;
+  if (!auth.user) { navigate({ to: "/login" }); return null; }
+
   const [cat, setCat] = useState("Trending");
   const [featured, setFeatured] = useState<SPlaylist[]>([]);
   const [loading, setLoading] = useState(false);
