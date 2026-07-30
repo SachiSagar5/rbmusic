@@ -1,6 +1,5 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { useAuth } from "@/lib/auth";
 
 const NAV = [
   { to: "/", label: "Home" },
@@ -13,7 +12,6 @@ export function AppHeader() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const search = useRouterState({ select: (s) => (s.location.search as { q?: string })?.q ?? "" });
   const [q, setQ] = useState(search);
-  const auth = useAuth();
 
   useEffect(() => setQ(search), [search]);
 
@@ -66,23 +64,6 @@ export function AppHeader() {
               </Link>
             );
           })}
-          {!auth.loading && (
-            auth.user ? (
-              <Link
-                to="/dashboard"
-                className="grid h-8 w-8 place-items-center rounded-full bg-gradient-to-br from-fuchsia-500 to-indigo-500 text-[11px] font-bold text-white ring-1 ring-white/20 transition hover:ring-fuchsia-400"
-              >
-                {auth.user.name.charAt(0).toUpperCase()}
-              </Link>
-            ) : (
-              <Link
-                to="/login"
-                className="flex items-center gap-1.5 rounded-full bg-gradient-to-r from-fuchsia-500 to-indigo-500 px-3 py-1.5 text-xs font-semibold text-white shadow-lg shadow-fuchsia-500/30 transition hover:scale-[1.04] active:scale-[0.97]"
-              >
-                Sign in
-              </Link>
-            )
-          )}
         </nav>
       </div>
 

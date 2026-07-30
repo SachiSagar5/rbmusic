@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite dev --host",
     "build": "vite build",
+    "build:gh-pages": "vite build --config vite.client.config.ts && cp dist/client-index.html dist/index.html && cp dist/client-index.html dist/404.html && cp public/favicon.* dist/ && touch dist/.nojekyll",
     "build:dev": "vite build --mode development",
     "preview": "vite preview",
     "lint": "eslint .",
