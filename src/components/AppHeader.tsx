@@ -7,7 +7,7 @@ const NAV = [
   { to: "/library", label: "Library" },
 ] as const;
 
-export function AppHeader({ onMenuToggle }: { onMenuToggle?: () => void }) {
+export function AppHeader({ onMenuToggle, theme, onThemeToggle }: { onMenuToggle?: () => void; theme?: "dark" | "light"; onThemeToggle?: () => void }) {
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const search = useRouterState({ select: (s) => (s.location.search as { q?: string })?.q ?? "" });
@@ -84,6 +84,52 @@ export function AppHeader({ onMenuToggle }: { onMenuToggle?: () => void }) {
 
         {/* Actions */}
         <div className="flex items-center gap-2">
+          <button
+            onClick={onThemeToggle}
+            className="theme-toggle hidden sm:flex"
+            aria-label={theme === "dark" ? "Switch to Light Mode" : "Switch to Dark Mode"}
+            title={theme === "dark" ? "Switch to Light Mode" : "Switch to Dark Mode"}
+          >
+            <span className="theme-toggle-icon theme-toggle-icon--sun">
+              <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="currentColor">
+                <circle cx="12" cy="12" r="4" />
+                <path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32l1.41 1.41M2 12h2m16 0h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" strokeWidth="2" stroke="currentColor" fill="none" strokeLinecap="round" />
+              </svg>
+            </span>
+            <span className="theme-toggle-thumb">
+              {theme === "dark" ? (
+                <svg viewBox="0 0 24 24" className="h-3 w-3 text-white" fill="currentColor">
+                  <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" />
+                </svg>
+              ) : (
+                <svg viewBox="0 0 24 24" className="h-3 w-3 text-white" fill="currentColor">
+                  <circle cx="12" cy="12" r="4" />
+                  <path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32l1.41 1.41M2 12h2m16 0h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" strokeWidth="2" stroke="currentColor" fill="none" strokeLinecap="round" />
+                </svg>
+              )}
+            </span>
+            <span className="theme-toggle-icon theme-toggle-icon--moon">
+              <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="currentColor">
+                <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" />
+              </svg>
+            </span>
+          </button>
+          <button
+            onClick={onThemeToggle}
+            className="grid h-9 w-9 place-items-center rounded-xl text-white/40 transition hover:bg-white/10 hover:text-white/80 sm:hidden"
+            aria-label={theme === "dark" ? "Switch to Light Mode" : "Switch to Dark Mode"}
+          >
+            {theme === "dark" ? (
+              <svg viewBox="0 0 24 24" className="h-5 w-5" fill="currentColor">
+                <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" />
+              </svg>
+            ) : (
+              <svg viewBox="0 0 24 24" className="h-5 w-5" fill="currentColor">
+                <circle cx="12" cy="12" r="4" />
+                <path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32l1.41 1.41M2 12h2m16 0h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" strokeWidth="2" stroke="currentColor" fill="none" strokeLinecap="round" />
+              </svg>
+            )}
+          </button>
           <button
             className="grid h-9 w-9 place-items-center rounded-xl text-white/40 transition hover:bg-white/10 hover:text-white/80"
             aria-label="Notifications"

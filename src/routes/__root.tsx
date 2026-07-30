@@ -8,7 +8,7 @@ import {
   Scripts,
   useRouterState,
 } from "@tanstack/react-router";
-import { useEffect, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useState, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -112,8 +112,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" data-theme="dark">
       <head>
+        <script dangerouslySetInnerHTML={{
+          __html: `(function(){try{var t=localStorage.getItem("rbm:theme");if(t==="light"){document.documentElement.setAttribute("data-theme","light")}else if(!t&&window.matchMedia("(prefers-color-scheme:light)").matches){document.documentElement.setAttribute("data-theme","light")}}catch(e){}})()`
+        }} />
         <HeadContent />
       </head>
       <body className="antialiased">
@@ -300,6 +303,21 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [theme, setTheme] = useState<"dark" | "light">(() => {
+    if (typeof document !== "undefined") {
+      return document.documentElement.getAttribute("data-theme") === "light" ? "light" : "dark";
+    }
+    return "dark";
+  });
+
+  const toggleTheme = useCallback(() => {
+    setTheme((prev) => (prev === "dark" ? "light" : "dark"));
+  }, []);
+
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", theme);
+    try { localStorage.setItem("rbm:theme", theme); } catch {}
+  }, [theme]);
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -317,7 +335,7 @@ function RootComponent() {
                 <Sidebar mobileOpen={mobileOpen} onClose={() => setMobileOpen(false)} sidebarOpen={sidebarOpen} onToggle={() => setSidebarOpen((v) => !v)} />
 
                 <div className={`flex min-w-0 flex-1 flex-col transition-all duration-300 ${sidebarOpen ? "lg:ml-60" : "lg:ml-16"}`}>
-                  <AppHeader onMenuToggle={() => setMobileOpen(!mobileOpen)} />
+                  <AppHeader onMenuToggle={() => setMobileOpen(!mobileOpen)} theme={theme} onThemeToggle={toggleTheme} />
 
                   <main className="flex-1 px-4 pb-48 pt-4 sm:px-6 sm:pb-40 lg:px-8 xl:px-10">
                     <Outlet />
