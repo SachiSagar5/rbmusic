@@ -6,6 +6,7 @@ import { Link } from "@tanstack/react-router";
 import { SongList } from "@/components/SongList";
 import { LazySection } from "@/components/LazySection";
 import { usePlayer } from "@/lib/player";
+import { ensureDailySync, syncDailySongs, formatSyncTime, type DailySync } from "@/lib/daily-sync";
 import {
   searchAlbums,
   searchArtists,
@@ -59,7 +60,35 @@ type Home = {
 function HomeView() {
   const [data, setData] = useState<Home | null>(null);
   const [loading, setLoading] = useState(true);
+  const [daily, setDaily] = useState<DailySync | null>(null);
+  const [dailyLoading, setDailyLoading] = useState(true);
+  const [dailySyncing, setDailySyncing] = useState(false);
   const deferred = useRef(false);
+
+  useEffect(() => {
+    let ignore = false;
+    ensureDailySync()
+      .then((sync) => {
+        if (!ignore) setDaily(sync);
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (!ignore) setDailyLoading(false);
+      });
+    return () => {
+      ignore = true;
+    };
+  }, []);
+
+  const handleResync = async () => {
+    setDailySyncing(true);
+    try {
+      const sync = await syncDailySongs();
+      setDaily(sync);
+    } finally {
+      setDailySyncing(false);
+    }
+  };
 
   useEffect(() => {
     if (data?.trending?.[0]) {
@@ -111,9 +140,11 @@ function HomeView() {
 
   return (
     <div className="space-y-10 pb-8">
-      <Hero songs={data?.trending ?? []} loading={loading} />
+      <Hero songs={daily?.songs?.length ? daily.songs : (data?.trending ?? [])} loading={loading || dailyLoading} />
 
       <ExpandableSongList songs={data?.trending ?? []} loading={loading} />
+
+      <DailySyncSection daily={daily} loading={dailyLoading} syncing={dailySyncing} onResync={handleResync} />
 
       <LazySection>
         <Row title="Top Charts" loading={!data?.charts?.length}>
@@ -560,6 +591,97 @@ function ExpandableSongList({ songs, loading }: { songs: SSong[]; loading: boole
     <section>
       <RowHeader title="Trending Now" viewAll={viewAll} onToggle={songs.length > 8 ? () => setViewAll((v) => !v) : undefined} />
       <SongList songs={viewAll ? songs : songs.slice(0, 8)} />
+    </section>
+  );
+}
+
+function DailySyncSection({
+  daily,
+  loading,
+  syncing,
+  onResync,
+}: {
+  daily: DailySync | null;
+  loading: boolean;
+  syncing: boolean;
+  onResync: () => void;
+}) {
+  const [viewAll, setViewAll] = useState(false);
+  const songs = daily?.songs ?? [];
+  const title = "Daily Sync";
+
+  if (loading) {
+    return (
+      <section>
+        <RowHeader title={title} />
+        <div className="space-y-2">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="flex items-center gap-3 rounded-2xl bg-white/[3%] p-3 animate-pulse">
+              <div className="h-10 w-10 rounded-lg bg-white/8" />
+              <div className="flex-1 space-y-1.5">
+                <div className="h-3 w-40 rounded bg-white/8" />
+                <div className="h-2.5 w-24 rounded bg-white/5" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+    );
+  }
+
+  return (
+    <section>
+      <div className="mb-4 flex items-baseline justify-between">
+        <div className="flex items-center gap-2.5">
+          <h2 className="text-lg font-bold tracking-tight text-white sm:text-xl">{title}</h2>
+          {daily && (
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-fuchsia-500/15 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-fuchsia-200 ring-1 ring-fuchsia-500/30">
+              <svg viewBox="0 0 24 24" className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                <circle cx="12" cy="12" r="9" />
+                <path d="M12 7v5l3 2" />
+              </svg>
+              Synced {formatSyncTime(daily.syncedAt)}
+            </span>
+          )}
+        </div>
+        <button
+          onClick={onResync}
+          disabled={syncing}
+          className="flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-semibold text-white/50 transition-all hover:bg-white/5 hover:text-white active:scale-95 disabled:opacity-50"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            className={`h-3.5 w-3.5 ${syncing ? "animate-spin" : ""}`}
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M21 12a9 9 0 1 1-2.64-6.36M21 3v6h-6" />
+          </svg>
+          {syncing ? "Syncing" : "Sync now"}
+        </button>
+      </div>
+      <SongList songs={viewAll ? songs : songs.slice(0, 8)} />
+      {songs.length > 8 && (
+        <button
+          onClick={() => setViewAll((v) => !v)}
+          className="mt-3 flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-semibold text-fuchsia-300 transition-all hover:bg-white/5 hover:text-fuchsia-200 active:scale-95"
+        >
+          {viewAll ? "Show Less" : "View All"}
+          <svg
+            viewBox="0 0 24 24"
+            className={`h-3.5 w-3.5 transition-transform duration-200 ${viewAll ? "rotate-180" : ""}`}
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+          >
+            <path d="M6 9l6 6 6-6" />
+          </svg>
+        </button>
+      )}
     </section>
   );
 }
