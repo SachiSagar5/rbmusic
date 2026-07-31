@@ -16,6 +16,7 @@ import { PlayerProvider } from "@/lib/player";
 import { DeviceProvider } from "@/lib/device";
 import { AppHeader } from "@/components/AppHeader";
 import { PlayerBar } from "@/components/PlayerBar";
+import { InstallPrompt } from "@/components/InstallPrompt";
 import { NowPlayingBackdrop } from "@/components/NowPlayingBackdrop";
 import { AuthProvider } from "@/lib/auth";
 
@@ -364,6 +365,7 @@ function RootComponent() {
               </div>
 
               <PlayerBar />
+              <InstallPrompt />
             </div>
             <p className="fixed inset-x-0 bottom-0 z-20 pb-4 text-center text-[10px] leading-none text-white/25">
               Developed by{" "}

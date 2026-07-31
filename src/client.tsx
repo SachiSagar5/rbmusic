@@ -6,6 +6,12 @@ import "./styles.css";
 
 const router = getRouter();
 
+if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("/rbmusic/sw.js").catch(() => {});
+  });
+}
+
 const root = document.getElementById("root");
 if (root) {
   ReactDOM.createRoot(root).render(

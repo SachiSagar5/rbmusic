@@ -18,9 +18,10 @@ export function DeviceSelector() {
     if (open) dev.refreshDevices();
   }, [open, dev]);
 
-  const inviteUrl = dev.deviceId
-    ? `${window.location.origin}${window.location.pathname}?connect=${dev.deviceId}`
-    : null;
+  const inviteUrl =
+    dev.deviceId && typeof window !== "undefined"
+      ? `${window.location.origin}${window.location.pathname}?connect=${dev.deviceId}`
+      : null;
 
   const handleSelectDevice = async (deviceId: string | null) => {
     if (deviceId === null) {
