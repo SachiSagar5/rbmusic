@@ -16,6 +16,9 @@ dist-ssr
 .nitro
 *.local
 
+# GitHub Actions workflow (token lacks workflow scope; unignore to enable)
+.github/
+
 # Wrangler / Cloudflare
 .wrangler/
 .dev.vars
