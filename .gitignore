@@ -15,6 +15,7 @@ dist-ssr
 .tanstack/**
 .nitro
 *.local
+release
 
 # GitHub Actions workflow (token lacks workflow scope; unignore to enable)
 .github/
