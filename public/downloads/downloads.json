@@ -4,7 +4,7 @@
   "files": [
     { "platform": "Android", "file": "rbmusic.apk", "size": "", "available": false },
     { "platform": "iOS", "file": "rbmusic.ipa", "size": "", "available": false },
-    { "platform": "macOS", "file": "rbmusic.dmg", "size": "", "available": false },
+    { "platform": "macOS", "file": "rbmusic.dmg", "url": "https://github.com/SachiSagar5/rbmusic/releases/download/v1.0.0/RB.Music-1.0.0-arm64.dmg", "size": "116 MB", "available": true },
     { "platform": "Windows", "file": "rbmusic.exe", "size": "", "available": false }
   ]
 }

@@ -4,6 +4,7 @@ import { Apple, Download, Loader2, Monitor, MonitorDown, Smartphone, X } from "l
 type DownloadFile = {
   platform: "Android" | "iOS" | "macOS" | "Windows";
   file?: string;
+  url?: string;
   size?: string;
   available?: boolean;
 };
@@ -96,7 +97,7 @@ export function InstallMenu({ open, onClose }: { open: boolean; onClose: () => v
           {files.map((f) => {
             const meta = PLATFORM_META[f.platform];
             const Icon = meta.icon;
-            const href = `${base}downloads/${f.file ?? ""}`;
+            const href = f.url ?? `${base}downloads/${f.file ?? ""}`;
             return (
               <div
                 key={f.platform}
@@ -109,7 +110,10 @@ export function InstallMenu({ open, onClose }: { open: boolean; onClose: () => v
                 </span>
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-semibold text-white">{f.platform}</p>
-                  <p className="text-xs text-white/50">{meta.note}</p>
+                  <p className="text-xs text-white/50">
+                    {meta.note}
+                    {f.size ? ` · ${f.size}` : ""}
+                  </p>
                 </div>
                 {loading ? (
                   <Loader2 className="h-4 w-4 animate-spin text-white/40" />
