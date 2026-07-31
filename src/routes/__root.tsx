@@ -17,6 +17,7 @@ import { DeviceProvider } from "@/lib/device";
 import { AppHeader } from "@/components/AppHeader";
 import { PlayerBar } from "@/components/PlayerBar";
 import { InstallPrompt } from "@/components/InstallPrompt";
+import { InstallMenu } from "@/components/InstallMenu";
 import { NowPlayingBackdrop } from "@/components/NowPlayingBackdrop";
 import { AuthProvider } from "@/lib/auth";
 
@@ -155,7 +156,7 @@ const SIDEBAR_NAV = [
   { to: "/playlists", label: "Playlists", icon: "music" },
 ] as const;
 
-function Sidebar({ mobileOpen, onClose, sidebarOpen, onToggle }: { mobileOpen?: boolean; onClose?: () => void; sidebarOpen?: boolean; onToggle?: () => void }) {
+function Sidebar({ mobileOpen, onClose, sidebarOpen, onToggle, onInstallOpen }: { mobileOpen?: boolean; onClose?: () => void; sidebarOpen?: boolean; onToggle?: () => void; onInstallOpen?: () => void }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   const icons: Record<string, ReactNode> = {
@@ -225,6 +226,19 @@ function Sidebar({ mobileOpen, onClose, sidebarOpen, onToggle }: { mobileOpen?: 
       </nav>
 
       <div className="border-t border-white/[3%] px-2 py-3">
+        <button
+          onClick={onInstallOpen}
+          className={`flex w-full items-center rounded-xl py-2.5 text-sm font-medium text-white/50 transition hover:bg-white/5 hover:text-white/80 ${
+            expanded ? "gap-3 px-3 justify-start" : "justify-center gap-0 px-0"
+          }`}
+          title={expanded ? undefined : "Install Now"}
+        >
+          <svg viewBox="0 0 24 24" className="h-5 w-5 text-white/40" fill="none" stroke="currentColor" strokeWidth="1.5">
+            <path d="M12 3v12m0 0l-4-4m4 4l4-4" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+          {expanded && <span>Install Now</span>}
+        </button>
         <Link
           to="/dashboard"
           className={`flex items-center rounded-xl py-2.5 text-sm font-medium text-white/50 transition hover:bg-white/5 hover:text-white/80 ${
@@ -301,6 +315,19 @@ function Sidebar({ mobileOpen, onClose, sidebarOpen, onToggle }: { mobileOpen?: 
               })}
             </nav>
             <div className="border-t border-white/[3%] px-3 py-3">
+              <button
+                onClick={() => {
+                  onClose?.();
+                  onInstallOpen?.();
+                }}
+                className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-white/50 transition hover:bg-white/5 hover:text-white/80"
+              >
+                <svg viewBox="0 0 24 24" className="h-5 w-5 text-white/40" fill="none" stroke="currentColor" strokeWidth="1.5">
+                  <path d="M12 3v12m0 0l-4-4m4 4l4-4" strokeLinecap="round" strokeLinejoin="round" />
+                  <path d="M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+                Install Now
+              </button>
               <Link
                 to="/dashboard"
                 onClick={onClose}
@@ -324,6 +351,7 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [installOpen, setInstallOpen] = useState(false);
   const [theme, setTheme] = useState<"dark" | "light">(() => {
     if (typeof document !== "undefined") {
       return document.documentElement.getAttribute("data-theme") === "light" ? "light" : "dark";
@@ -353,7 +381,7 @@ function RootComponent() {
               <div className="pointer-events-none fixed -bottom-20 right-1/4 h-[420px] w-[420px] rounded-full bg-pink-500/20 blur-[100px] animate-pulse" style={{ animationDuration: "9s" }} />
 
               <div className="relative z-10 flex">
-                <Sidebar mobileOpen={mobileOpen} onClose={() => setMobileOpen(false)} sidebarOpen={sidebarOpen} onToggle={() => setSidebarOpen((v) => !v)} />
+                <Sidebar mobileOpen={mobileOpen} onClose={() => setMobileOpen(false)} sidebarOpen={sidebarOpen} onToggle={() => setSidebarOpen((v) => !v)} onInstallOpen={() => setInstallOpen(true)} />
 
                 <div className={`flex min-w-0 flex-1 flex-col transition-all duration-300 ${sidebarOpen ? "lg:ml-60" : "lg:ml-16"}`}>
                   <AppHeader onMenuToggle={() => setMobileOpen(!mobileOpen)} theme={theme} onThemeToggle={toggleTheme} />
@@ -366,6 +394,7 @@ function RootComponent() {
 
               <PlayerBar />
               <InstallPrompt />
+              <InstallMenu open={installOpen} onClose={() => setInstallOpen(false)} />
             </div>
             <p className="fixed inset-x-0 bottom-0 z-20 pb-4 text-center text-[10px] leading-none text-white/25">
               Developed by{" "}

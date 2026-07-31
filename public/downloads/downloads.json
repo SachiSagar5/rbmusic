@@ -1,0 +1,10 @@
+{
+  "version": "1.0.0",
+  "updated": "2026-07-31",
+  "files": [
+    { "platform": "Android", "file": "rbmusic.apk", "size": "", "available": false },
+    { "platform": "iOS", "file": "rbmusic.ipa", "size": "", "available": false },
+    { "platform": "macOS", "file": "rbmusic.dmg", "size": "", "available": false },
+    { "platform": "Windows", "file": "rbmusic.exe", "size": "", "available": false }
+  ]
+}
