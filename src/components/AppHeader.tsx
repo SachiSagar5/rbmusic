@@ -7,7 +7,15 @@ const NAV = [
   { to: "/library", label: "Library" },
 ] as const;
 
-export function AppHeader({ onMenuToggle, theme, onThemeToggle }: { onMenuToggle?: () => void; theme?: "dark" | "light"; onThemeToggle?: () => void }) {
+export function AppHeader({
+  onMenuToggle,
+  theme,
+  onThemeToggle,
+}: {
+  onMenuToggle?: () => void;
+  theme?: "dark" | "light";
+  onThemeToggle?: () => void;
+}) {
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const search = useRouterState({ select: (s) => (s.location.search as { q?: string })?.q ?? "" });
@@ -19,7 +27,7 @@ export function AppHeader({ onMenuToggle, theme, onThemeToggle }: { onMenuToggle
     e.preventDefault();
     const value = q.trim();
     if (!value) return;
-    navigate({ to: "/", search: { q: value } });
+    navigate({ to: "/search", search: { q: value } });
   };
 
   return (
@@ -32,14 +40,26 @@ export function AppHeader({ onMenuToggle, theme, onThemeToggle }: { onMenuToggle
             className="grid h-9 w-9 place-items-center rounded-xl text-white/60 hover:bg-white/10 hover:text-white transition"
             aria-label="Menu"
           >
-            <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
+            <svg
+              viewBox="0 0 24 24"
+              className="h-5 w-5"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
               <path d="M4 6h16M4 12h16M4 18h16" strokeLinecap="round" />
             </svg>
           </button>
           <Link to="/" className="flex items-center gap-2">
             <div className="grid h-8 w-8 place-items-center rounded-lg bg-gradient-to-br from-fuchsia-500 via-purple-500 to-indigo-500 shadow-lg shadow-fuchsia-500/30 ring-1 ring-white/20">
               <svg viewBox="0 0 24 24" fill="none" className="h-4 w-4 text-white">
-                <path d="M9 18V6l10-2v12" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                <path
+                  d="M9 18V6l10-2v12"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
                 <circle cx="6" cy="18" r="3" stroke="currentColor" strokeWidth="1.8" />
                 <circle cx="16" cy="16" r="3" stroke="currentColor" strokeWidth="1.8" />
               </svg>
@@ -49,8 +69,15 @@ export function AppHeader({ onMenuToggle, theme, onThemeToggle }: { onMenuToggle
         </div>
 
         {/* Search bar */}
-        <form onSubmit={submit} className="relative ml-auto flex flex-1 items-center max-w-md lg:mx-auto lg:max-w-lg">
-          <svg viewBox="0 0 24 24" fill="none" className="pointer-events-none absolute left-3 h-4 w-4 text-white/40">
+        <form
+          onSubmit={submit}
+          className="relative ml-auto flex flex-1 items-center max-w-md lg:mx-auto lg:max-w-lg"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            className="pointer-events-none absolute left-3 h-4 w-4 text-white/40"
+          >
             <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="2" />
             <path d="m20 20-3-3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
           </svg>
@@ -93,7 +120,13 @@ export function AppHeader({ onMenuToggle, theme, onThemeToggle }: { onMenuToggle
             <span className="theme-toggle-icon theme-toggle-icon--sun">
               <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="currentColor">
                 <circle cx="12" cy="12" r="4" />
-                <path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32l1.41 1.41M2 12h2m16 0h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" strokeWidth="2" stroke="currentColor" fill="none" strokeLinecap="round" />
+                <path
+                  d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32l1.41 1.41M2 12h2m16 0h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"
+                  strokeWidth="2"
+                  stroke="currentColor"
+                  fill="none"
+                  strokeLinecap="round"
+                />
               </svg>
             </span>
             <span className="theme-toggle-thumb">
@@ -104,7 +137,13 @@ export function AppHeader({ onMenuToggle, theme, onThemeToggle }: { onMenuToggle
               ) : (
                 <svg viewBox="0 0 24 24" className="h-3 w-3 text-white" fill="currentColor">
                   <circle cx="12" cy="12" r="4" />
-                  <path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32l1.41 1.41M2 12h2m16 0h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" strokeWidth="2" stroke="currentColor" fill="none" strokeLinecap="round" />
+                  <path
+                    d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32l1.41 1.41M2 12h2m16 0h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"
+                    strokeWidth="2"
+                    stroke="currentColor"
+                    fill="none"
+                    strokeLinecap="round"
+                  />
                 </svg>
               )}
             </span>
@@ -126,7 +165,13 @@ export function AppHeader({ onMenuToggle, theme, onThemeToggle }: { onMenuToggle
             ) : (
               <svg viewBox="0 0 24 24" className="h-5 w-5" fill="currentColor">
                 <circle cx="12" cy="12" r="4" />
-                <path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32l1.41 1.41M2 12h2m16 0h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" strokeWidth="2" stroke="currentColor" fill="none" strokeLinecap="round" />
+                <path
+                  d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32l1.41 1.41M2 12h2m16 0h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"
+                  strokeWidth="2"
+                  stroke="currentColor"
+                  fill="none"
+                  strokeLinecap="round"
+                />
               </svg>
             )}
           </button>
@@ -134,8 +179,18 @@ export function AppHeader({ onMenuToggle, theme, onThemeToggle }: { onMenuToggle
             className="grid h-9 w-9 place-items-center rounded-xl text-white/40 transition hover:bg-white/10 hover:text-white/80"
             aria-label="Notifications"
           >
-            <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.5">
-              <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9" strokeLinecap="round" strokeLinejoin="round" />
+            <svg
+              viewBox="0 0 24 24"
+              className="h-5 w-5"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+            >
+              <path
+                d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
               <path d="M13.73 21a2 2 0 01-3.46 0" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </button>
