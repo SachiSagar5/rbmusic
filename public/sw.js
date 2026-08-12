@@ -1,4 +1,4 @@
-const CACHE = "rbmusic-v1";
+const CACHE = "rbmusic-v2";
 const PRECACHE = [
   "/rbmusic/",
   "/rbmusic/manifest.json",
